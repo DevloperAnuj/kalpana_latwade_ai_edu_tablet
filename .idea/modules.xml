@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+<module fileurl="file://$PROJECT_DIR$/admin_panel/melos_admin_panel.iml" filepath="$PROJECT_DIR$/admin_panel/melos_admin_panel.iml"/>
+<module fileurl="file://$PROJECT_DIR$/student_tab/melos_student_tab.iml" filepath="$PROJECT_DIR$/student_tab/melos_student_tab.iml"/>
+<module fileurl="file://$PROJECT_DIR$/melos_kalpana_ai_edu_tablet_workspace.iml" filepath="$PROJECT_DIR$/melos_kalpana_ai_edu_tablet_workspace.iml"/>
+    </modules>
+  </component>
+</project>

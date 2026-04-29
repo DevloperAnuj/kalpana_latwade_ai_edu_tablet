@@ -1,0 +1,13 @@
+name: kalpana_ai_edu_tablet_workspace
+description: Kalpana AI Education Tablet - Melos Monorepo Root
+publish_to: none
+
+environment:
+  sdk: ^3.10.0
+
+workspace:
+  - admin_panel
+  - student_tab
+
+dev_dependencies:
+  melos: ^7.5.1

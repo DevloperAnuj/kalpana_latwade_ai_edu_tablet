@@ -1,0 +1,51 @@
+name: kalpana_ai_edu_tablet
+
+packages:
+  - admin_panel
+  - student_tab
+
+
+scripts:
+  get:
+    run: melos exec -- flutter pub get
+    description: Run flutter pub get in all packages
+
+  clean:
+    run: melos exec -- flutter clean
+    description: Clean all packages
+
+  analyze:
+    run: melos exec -- flutter analyze
+    description: Analyze all packages
+
+  test:
+    run: melos exec -- flutter test
+    description: Run tests in all packages
+
+  format:
+    run: melos exec -- dart format .
+    description: Format all Dart files in all packages
+
+  # --- Per-app build commands ---
+
+  build:admin:windows:
+    run: melos exec --scope="admin_panel" -- flutter build windows
+    description: Build Windows app for admin_panel
+
+  build:student:apk:
+    run: melos exec --scope="student_tab" -- flutter build apk
+    description: Build Android APK for student_tab
+
+  build:student:appbundle:
+    run: melos exec --scope="student_tab" -- flutter build appbundle
+    description: Build Android App Bundle for student_tab
+
+  # --- Run commands ---
+
+  run:admin:
+    run: melos exec --scope="admin_panel" -- flutter run
+    description: Run admin_panel app
+
+  run:student:
+    run: melos exec --scope="student_tab" -- flutter run
+    description: Run student_tab app
