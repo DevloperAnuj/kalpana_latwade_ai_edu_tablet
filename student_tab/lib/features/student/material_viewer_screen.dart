@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../bloc/material_viewer/material_viewer_cubit.dart';
 import '../../models/study_materials.dart';
@@ -94,7 +95,10 @@ class _MaterialViewerScreenState extends State<MaterialViewerScreen>
                 _FlashcardsTab(flashcards: state.flashcards),
                 _InfographicTab(sections: state.infographicSections),
                 _TableTab(tableData: state.tableData),
-                const _QuizPlaceholderTab(),
+                _QuizTab(
+                  quizJson: state.quizJson,
+                  materialId: state.quizMaterialId,
+                ),
               ],
             );
           }
@@ -858,41 +862,584 @@ class _TableTab extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Quiz placeholder (Phase 9)
+// Quiz tab – Phase 9
 // ════════════════════════════════════════════════════════════════════════════
 
-class _QuizPlaceholderTab extends StatelessWidget {
-  const _QuizPlaceholderTab();
+enum _QuizPhase { taking, submitting, done }
+
+class _WrongAnswer {
+  final int index;
+  final String questionText;
+  final String selectedText;
+  final String correctText;
+  final String explanation;
+
+  const _WrongAnswer({
+    required this.index,
+    required this.questionText,
+    required this.selectedText,
+    required this.correctText,
+    required this.explanation,
+  });
+}
+
+class _QuizResult {
+  final int score;
+  final int total;
+  final List<_WrongAnswer> wrongAnswers;
+  final String? submitError; // null = submitted OK
+
+  const _QuizResult({
+    required this.score,
+    required this.total,
+    required this.wrongAnswers,
+    this.submitError,
+  });
+}
+
+class _QuizTab extends StatefulWidget {
+  final Map<String, dynamic>? quizJson;
+  final String? materialId;
+
+  const _QuizTab({required this.quizJson, required this.materialId});
+
+  @override
+  State<_QuizTab> createState() => _QuizTabState();
+}
+
+class _QuizTabState extends State<_QuizTab> {
+  List<QuizQuestion> _questions = [];
+  List<int?> _selected = [];
+  _QuizPhase _phase = _QuizPhase.taking;
+  _QuizResult? _result;
+  bool _parseError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _parseQuestions();
+  }
+
+  void _parseQuestions() {
+    if (widget.quizJson == null) return;
+    try {
+      final list = widget.quizJson!['questions'] as List;
+      _questions = list
+          .map((q) => QuizQuestion.fromJson(q as Map<String, dynamic>))
+          .toList();
+      _selected = List.filled(_questions.length, null);
+    } catch (_) {
+      _parseError = true;
+    }
+  }
+
+  int get _answeredCount => _selected.where((s) => s != null).length;
+  bool get _allAnswered =>
+      _questions.isNotEmpty && _answeredCount == _questions.length;
+
+  Future<void> _confirmAndSubmit(BuildContext context) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Submit Quiz?'),
+        content: Text(
+            'You have answered $_answeredCount of ${_questions.length} questions. Submit now?'),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: const Text('Cancel')),
+          FilledButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              child: const Text('Submit')),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) await _submit();
+  }
+
+  Future<void> _submit() async {
+    // Grade
+    int score = 0;
+    final wrong = <_WrongAnswer>[];
+    for (int i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      final ans = _selected[i]!;
+      if (ans == q.correct) {
+        score++;
+      } else {
+        wrong.add(_WrongAnswer(
+          index: i,
+          questionText: q.text,
+          selectedText: q.options[ans],
+          correctText: q.options[q.correct],
+          explanation: q.explanation,
+        ));
+      }
+    }
+
+    setState(() => _phase = _QuizPhase.submitting);
+
+    // Push to Supabase
+    String? submitError;
+    if (widget.materialId == null) {
+      submitError = 'material_id is null — quiz was not saved to the database.';
+    } else {
+      try {
+        final supabase = Supabase.instance.client;
+        final answersJson = {
+          for (int i = 0; i < _selected.length; i++) '$i': _selected[i]!
+        };
+        await supabase.from('quiz_attempts').insert({
+          'student_id': supabase.auth.currentUser!.id,
+          'material_id': widget.materialId,
+          'answers_json': answersJson,
+          'score': score,
+        });
+      } catch (e) {
+        submitError = e.toString();
+      }
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _result = _QuizResult(
+          score: score,
+          total: _questions.length,
+          wrongAnswers: wrong,
+          submitError: submitError);
+      _phase = _QuizPhase.done;
+    });
+  }
+
+  Future<void> _retrySubmit() async {
+    setState(() => _phase = _QuizPhase.submitting);
+    String? submitError;
+    try {
+      final supabase = Supabase.instance.client;
+      final answersJson = {
+        for (int i = 0; i < _selected.length; i++) '$i': _selected[i]!
+      };
+      await supabase.from('quiz_attempts').insert({
+        'student_id': supabase.auth.currentUser!.id,
+        'material_id': widget.materialId,
+        'answers_json': answersJson,
+        'score': _result!.score,
+      });
+    } catch (e) {
+      submitError = e.toString();
+    }
+    if (!mounted) return;
+    setState(() {
+      _result = _QuizResult(
+          score: _result!.score,
+          total: _result!.total,
+          wrongAnswers: _result!.wrongAnswers,
+          submitError: submitError);
+      _phase = _QuizPhase.done;
+    });
+  }
+
+  void _retake() {
+    setState(() {
+      _selected = List.filled(_questions.length, null);
+      _phase = _QuizPhase.taking;
+      _result = null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.quiz_outlined,
-              size: 72,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 20),
-            Text(
-              'Quiz Coming Soon!',
-              style: Theme.of(context).textTheme.headlineSmall,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Test your knowledge with MCQs.\nAvailable in the next update.',
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  ),
-            ),
-          ],
+    if (widget.quizJson == null) {
+      return const _EmptyMaterial('Quiz not available for this topic.');
+    }
+    if (_parseError) {
+      return const _EmptyMaterial(
+          'Quiz data is invalid. Please contact your teacher.');
+    }
+    if (_questions.isEmpty) {
+      return const _EmptyMaterial('No questions found in this quiz.');
+    }
+
+    return switch (_phase) {
+      _QuizPhase.taking => _buildForm(context),
+      _QuizPhase.submitting =>
+        const Center(child: CircularProgressIndicator()),
+      _QuizPhase.done => _buildResults(context),
+    };
+  }
+
+  // ── Quiz form ─────────────────────────────────────────────────────────────
+
+  Widget _buildForm(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final answered = _answeredCount;
+    final total = _questions.length;
+
+    return Column(
+      children: [
+        // Sticky progress bar
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          child: Column(
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('$answered of $total answered',
+                      style: Theme.of(context).textTheme.labelMedium),
+                  Text('${(answered / total * 100).round()}%',
+                      style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: cs.primary, fontWeight: FontWeight.w700)),
+                ],
+              ),
+              const SizedBox(height: 6),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                    value: answered / total, minHeight: 6),
+              ),
+            ],
+          ),
         ),
+
+        // Scrollable questions + submit button
+        Expanded(
+          child: ListView.builder(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+            itemCount: _questions.length + 1,
+            itemBuilder: (ctx, i) {
+              if (i == _questions.length) {
+                return Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: FilledButton.icon(
+                    onPressed:
+                        _allAnswered ? () => _confirmAndSubmit(context) : null,
+                    icon: const Icon(Icons.check_circle_outline),
+                    label: const Text('Submit Quiz'),
+                    style: FilledButton.styleFrom(
+                        minimumSize: const Size.fromHeight(52)),
+                  ),
+                );
+              }
+
+              final q = _questions[i];
+              final selected = _selected[i];
+
+              return Card(
+                margin: const EdgeInsets.only(bottom: 12),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Question header
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 28,
+                            height: 28,
+                            decoration: BoxDecoration(
+                              color: selected != null
+                                  ? cs.primary
+                                  : cs.surfaceContainerHigh,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Text('${i + 1}',
+                                style: TextStyle(
+                                  color: selected != null
+                                      ? cs.onPrimary
+                                      : cs.onSurfaceVariant,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w700,
+                                )),
+                          ),
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Text(q.text,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .bodyLarge
+                                    ?.copyWith(fontWeight: FontWeight.w500)),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Options
+                      ...List.generate(q.options.length, (oi) {
+                        final isSel = selected == oi;
+                        return GestureDetector(
+                          onTap: () => setState(() => _selected[i] = oi),
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 7),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isSel
+                                  ? cs.primaryContainer
+                                  : cs.surfaceContainerLowest,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: isSel ? cs.primary : cs.outlineVariant,
+                                width: isSel ? 1.5 : 1,
+                              ),
+                            ),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  isSel
+                                      ? Icons.radio_button_checked
+                                      : Icons.radio_button_unchecked,
+                                  size: 18,
+                                  color: isSel
+                                      ? cs.primary
+                                      : cs.onSurfaceVariant,
+                                ),
+                                const SizedBox(width: 10),
+                                Expanded(
+                                  child: Text(
+                                    q.options[oi],
+                                    style: TextStyle(
+                                      color: isSel
+                                          ? cs.onPrimaryContainer
+                                          : cs.onSurface,
+                                      fontWeight: isSel
+                                          ? FontWeight.w500
+                                          : FontWeight.normal,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // ── Results view ──────────────────────────────────────────────────────────
+
+  Widget _buildResults(BuildContext context) {
+    final r = _result!;
+    final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pct = r.score / r.total;
+    final isGood = pct >= 0.7;
+    final accentColor =
+        isGood ? const Color(0xFF2E7D32) : cs.error;
+    final bannerBg = isGood
+        ? (isDark ? const Color(0xFF1B3A1E) : const Color(0xFFE8F5E9))
+        : cs.errorContainer;
+
+    return ListView(
+      padding: const EdgeInsets.all(16),
+      children: [
+        // Score banner
+        Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+              color: bannerBg, borderRadius: BorderRadius.circular(16)),
+          child: Column(
+            children: [
+              Icon(
+                isGood ? Icons.emoji_events_rounded : Icons.replay_rounded,
+                size: 52,
+                color: accentColor,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'You got ${r.score} / ${r.total} correct!',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w700, color: accentColor),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 14),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
+                child: LinearProgressIndicator(
+                  value: pct,
+                  minHeight: 10,
+                  color: accentColor,
+                  backgroundColor: accentColor.withValues(alpha: 0.18),
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text('${(pct * 100).round()}%',
+                  style: TextStyle(
+                      color: accentColor, fontWeight: FontWeight.bold)),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Submission status banner
+        if (r.submitError == null)
+          _statusTile(context,
+              icon: Icons.cloud_done_rounded,
+              color: const Color(0xFF1971C2),
+              text: 'Results submitted to your teacher.')
+        else ...[
+          _statusTile(context,
+              icon: Icons.cloud_off_rounded,
+              color: cs.error,
+              text: 'Submission failed: ${r.submitError}'),
+          const SizedBox(height: 8),
+          OutlinedButton.icon(
+            onPressed: _retrySubmit,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Retry Submission'),
+            style: OutlinedButton.styleFrom(
+                minimumSize: const Size.fromHeight(44)),
+          ),
+        ],
+        const SizedBox(height: 20),
+
+        // Wrong answers
+        if (r.wrongAnswers.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Column(
+              children: [
+                const Icon(Icons.star_rounded,
+                    size: 48, color: Color(0xFFFCC419)),
+                const SizedBox(height: 8),
+                Text('Perfect score — all answers correct!',
+                    style: Theme.of(context).textTheme.titleMedium,
+                    textAlign: TextAlign.center),
+              ],
+            ),
+          )
+        else ...[
+          Text('Review wrong answers',
+              style: Theme.of(context)
+                  .textTheme
+                  .titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 8),
+          ...r.wrongAnswers.map((w) => Card(
+                margin: const EdgeInsets.only(bottom: 10),
+                child: ExpansionTile(
+                  tilePadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 2),
+                  leading:
+                      Icon(Icons.close_rounded, color: cs.error, size: 20),
+                  title: Text(
+                    'Q${w.index + 1}. ${w.questionText}',
+                    style: const TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w500),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _answerRow(context, 'Your answer', w.selectedText,
+                              cs.error),
+                          const SizedBox(height: 6),
+                          _answerRow(context, 'Correct answer',
+                              w.correctText, const Color(0xFF2E7D32)),
+                          if (w.explanation.isNotEmpty) ...[
+                            const SizedBox(height: 10),
+                            Container(
+                              padding: const EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                color: cs.surfaceContainerLowest,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text('💡 ',
+                                      style: TextStyle(fontSize: 14)),
+                                  Expanded(
+                                    child: Text(w.explanation,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodySmall
+                                            ?.copyWith(height: 1.5)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              )),
+        ],
+
+        const SizedBox(height: 24),
+        OutlinedButton.icon(
+          onPressed: _retake,
+          icon: const Icon(Icons.replay_rounded),
+          label: const Text('Retake Quiz'),
+          style:
+              OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  Widget _statusTile(BuildContext context,
+      {required IconData icon,
+      required Color color,
+      required String text}) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(width: 10),
+          Expanded(
+              child: Text(text,
+                  style: Theme.of(context).textTheme.bodySmall)),
+        ],
       ),
     );
   }
+
+  Widget _answerRow(
+      BuildContext context, String label, String answer, Color color) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 105,
+          child: Text('$label:',
+              style: TextStyle(
+                  fontSize: 12,
+                  color:
+                      Theme.of(context).colorScheme.onSurfaceVariant)),
+        ),
+        Expanded(
+          child: Text(answer,
+              style: TextStyle(
+                  fontSize: 13,
+                  color: color,
+                  fontWeight: FontWeight.w500)),
+        ),
+      ],
+    );
+  }
 }
+

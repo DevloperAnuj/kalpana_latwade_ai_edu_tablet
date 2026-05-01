@@ -22,7 +22,8 @@ class MaterialViewerLoaded extends MaterialViewerState {
   final List<Flashcard> flashcards;
   final List<InfographicSection> infographicSections;
   final TableData? tableData;
-  final Map<String, dynamic>? quizJson; // raw, consumed by Phase 9
+  final Map<String, dynamic>? quizJson;
+  final String? quizMaterialId; // UUID of the quiz row in `materials`
 
   const MaterialViewerLoaded({
     required this.mindmapNodes,
@@ -30,6 +31,7 @@ class MaterialViewerLoaded extends MaterialViewerState {
     required this.infographicSections,
     required this.tableData,
     required this.quizJson,
+    required this.quizMaterialId,
   });
 }
 
@@ -50,13 +52,16 @@ class MaterialViewerCubit extends Cubit<MaterialViewerState> {
     try {
       final data = await _supabase
           .from('materials')
-          .select('type, json_data')
+          .select('id, type, json_data')
           .eq('topic_id', topicId);
 
-      // Build a type → json_data map
+      // Build a type → json_data map; capture the quiz row's UUID separately.
       final raw = <String, Map<String, dynamic>>{};
+      String? quizMaterialId;
       for (final m in (data as List)) {
-        raw[m['type'] as String] = m['json_data'] as Map<String, dynamic>;
+        final type = m['type'] as String;
+        raw[type] = m['json_data'] as Map<String, dynamic>;
+        if (type == 'quiz') quizMaterialId = m['id'] as String;
       }
 
       // Mindmap: {"nodes": [...]}
@@ -91,6 +96,7 @@ class MaterialViewerCubit extends Cubit<MaterialViewerState> {
         infographicSections: infographicSections,
         tableData: tableData,
         quizJson: raw['quiz'],
+        quizMaterialId: quizMaterialId,
       ));
     } catch (e) {
       emit(MaterialViewerError(e.toString()));

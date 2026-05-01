@@ -59,3 +59,24 @@ class TableData {
             .toList(),
       );
 }
+
+class QuizQuestion {
+  final String text;
+  final List<String> options;
+  final int correct;
+  final String explanation;
+
+  const QuizQuestion({
+    required this.text,
+    required this.options,
+    required this.correct,
+    required this.explanation,
+  });
+
+  factory QuizQuestion.fromJson(Map<String, dynamic> j) => QuizQuestion(
+        text: j['text'] as String,
+        options: (j['options'] as List).cast<String>(),
+        correct: j['correct'] as int,
+        explanation: (j['explanation'] as String?) ?? '',
+      );
+}
