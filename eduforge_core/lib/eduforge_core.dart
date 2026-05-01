@@ -1,5 +1,14 @@
 export 'bloc/auth/auth_bloc.dart';
+export 'bloc/profile/profile_bloc.dart';
+export 'core/config/app_config.dart';
 export 'core/constants/supabase_constants.dart';
+export 'core/error/app_exception.dart';
+export 'core/error/error_logger.dart';
+export 'core/network/retry_policy.dart';
 export 'core/observer/app_bloc_observer.dart';
+export 'core/ui/responsive_layout.dart';
+export 'core/utils/input_sanitiser.dart';
 export 'cubit/theme/theme_cubit.dart';
+export 'data/repositories/profile_repository.dart';
 export 'features/auth/auth_screen.dart';
+export 'features/profile/profile_screen.dart';

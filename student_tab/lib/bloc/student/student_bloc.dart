@@ -2,27 +2,23 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:eduforge_core/eduforge_core.dart';
+
+import '../../data/repositories/class_repository.dart';
+
 part 'student_event.dart';
 part 'student_state.dart';
 
 class StudentBloc extends Bloc<StudentEvent, StudentState> {
-  StudentBloc() : super(const StudentInitial()) {
+  StudentBloc({StudentClassRepository? repository})
+      : _repo = repository ??
+            StudentClassRepository(Supabase.instance.client),
+        super(const StudentInitial()) {
     on<LoadJoinedClasses>(_onLoadClasses);
     on<JoinClassWithCode>(_onJoinClass);
   }
 
-  final _supabase = Supabase.instance.client;
-
-  Future<List<Map<String, dynamic>>> _fetchClasses() async {
-    final userId = _supabase.auth.currentUser!.id;
-    final data = await _supabase
-        .from('class_students')
-        .select('classes(id, name)')
-        .eq('student_id', userId);
-    return (data as List)
-        .map((row) => row['classes'] as Map<String, dynamic>)
-        .toList();
-  }
+  final StudentClassRepository _repo;
 
   Future<void> _onLoadClasses(
     LoadJoinedClasses event,
@@ -30,9 +26,14 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   ) async {
     emit(const StudentLoading());
     try {
-      final classes = await _fetchClasses();
+      final userId = Supabase.instance.client.auth.currentUser!.id;
+      final classes = await _repo.fetchJoinedClasses(userId);
       emit(StudentClassesLoaded(classes));
-    } catch (e) {
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'StudentBloc.LoadClasses');
+      emit(StudentError(e.message));
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'StudentBloc.LoadClasses');
       emit(StudentError(e.toString()));
     }
   }
@@ -43,16 +44,17 @@ class StudentBloc extends Bloc<StudentEvent, StudentState> {
   ) async {
     emit(const StudentLoading());
     try {
-      final result = await _supabase.rpc(
-        'join_class_by_code',
-        params: {'p_join_code': event.joinCode.toUpperCase()},
-      );
-      final className = result['class_name'] as String;
-      final classes = await _fetchClasses();
+      final className = await _repo.joinClass(event.joinCode);
+      final userId = Supabase.instance.client.auth.currentUser!.id;
+      final classes = await _repo.fetchJoinedClasses(userId);
       emit(StudentClassesLoaded(classes, justJoinedClassName: className));
-    } on PostgrestException catch (e) {
+    } on ValidationException catch (e) {
       emit(StudentError(e.message));
-    } catch (e) {
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'StudentBloc.JoinClass');
+      emit(StudentError(e.message));
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'StudentBloc.JoinClass');
       emit(StudentError(e.toString()));
     }
   }

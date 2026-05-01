@@ -74,6 +74,10 @@ GoRouter createRouter(AuthBloc authBloc) {
           ),
         ),
       ),
+      GoRoute(
+        path: '/profile',
+        builder: (context, state) => const ProfileScreen(),
+      ),
     ],
   );
 }

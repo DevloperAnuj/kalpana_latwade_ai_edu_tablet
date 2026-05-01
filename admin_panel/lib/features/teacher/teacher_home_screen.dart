@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:eduforge_core/eduforge_core.dart';
 
+import '../../bloc/ai_key/ai_key_bloc.dart';
 import '../../bloc/class/class_bloc.dart';
 import '../../bloc/class_selection/class_selection_cubit.dart';
 import '../../bloc/draft/draft_cubit.dart';
@@ -27,29 +28,69 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ClassBloc, ClassState>(
-      listener: (context, state) {
-        if (state is ClassOperationSuccess) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.message)),
-          );
-        } else if (state is ClassError) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(state.message),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ClassBloc, ClassState>(
+          listener: (context, state) {
+            if (state is ClassOperationSuccess) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.message)),
+              );
+            } else if (state is ClassError) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(state.message),
+                  backgroundColor: Theme.of(context).colorScheme.error,
+                ),
+              );
+            }
+          },
+        ),
+        BlocListener<AiKeyBloc, AiKeyState>(
+          listener: (context, state) {
+            if (state is AiKeyExpired) _showKeyExpiredDialog(context);
+          },
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('My Classes'),
+          title: BlocBuilder<AuthBloc, AuthState>(
+          builder: (context, authState) {
+            final name = authState is Authenticated
+                ? authState.displayName
+                : null;
+            return Text(
+              name != null && name.isNotEmpty
+                  ? 'Welcome, $name'
+                  : 'My Classes',
+            );
+          },
+        ),
           actions: [
+            BlocBuilder<AiKeyBloc, AiKeyState>(
+              builder: (context, state) => IconButton(
+                icon: state is AiKeyLoading
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.vpn_key_outlined),
+                tooltip: 'Refresh AI key',
+                onPressed: state is AiKeyLoading
+                    ? null
+                    : () =>
+                        context.read<AiKeyBloc>().add(const RefreshAiKey()),
+              ),
+            ),
             IconButton(
               icon: const Icon(Icons.brightness_6),
               tooltip: 'Toggle theme',
               onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+            ),
+            IconButton(
+              icon: const Icon(Icons.person_outline),
+              tooltip: 'My profile',
+              onPressed: () => context.push('/profile'),
             ),
             IconButton(
               icon: const Icon(Icons.logout),
@@ -106,12 +147,27 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
                   if (state is ClassesLoaded) {
                     if (state.classes.isEmpty) return const _EmptyState();
 
-                    return ListView.builder(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: state.classes.length,
-                      itemBuilder: (context, index) => Padding(
-                        padding: const EdgeInsets.only(bottom: 12),
-                        child: _ClassCard(cls: state.classes[index]),
+                    return ResponsiveLayout(
+                      compact: ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: state.classes.length,
+                        itemBuilder: (context, index) => Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: _ClassCard(cls: state.classes[index]),
+                        ),
+                      ),
+                      medium: SingleChildScrollView(
+                        padding: const EdgeInsets.all(16),
+                        child: Wrap(
+                          spacing: 12,
+                          runSpacing: 12,
+                          children: state.classes
+                              .map((cls) => SizedBox(
+                                    width: 380,
+                                    child: _ClassCard(cls: cls),
+                                  ))
+                              .toList(),
+                        ),
                       ),
                     );
                   }
@@ -153,6 +209,35 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
       builder: (_) => BlocProvider.value(
         value: ctx.read<ClassBloc>(),
         child: const _CreateClassDialog(),
+      ),
+    );
+  }
+
+  void _showKeyExpiredDialog(BuildContext ctx) {
+    showDialog<void>(
+      context: ctx,
+      builder: (dialogCtx) => AlertDialog(
+        icon: const Icon(Icons.vpn_key_off_outlined),
+        title: const Text('AI Key May Have Expired'),
+        content: const Text(
+          'The AI API key could not be retrieved. '
+          'It may have expired or your account lacks permission.\n\n'
+          'Contact your administrator to renew the key, then tap '
+          '"Refresh AI Key" in the toolbar.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogCtx).pop(),
+            child: const Text('OK'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.of(dialogCtx).pop();
+              ctx.read<AiKeyBloc>().add(const RefreshAiKey());
+            },
+            child: const Text('Retry'),
+          ),
+        ],
       ),
     );
   }

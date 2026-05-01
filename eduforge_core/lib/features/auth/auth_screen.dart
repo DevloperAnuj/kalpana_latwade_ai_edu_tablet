@@ -19,8 +19,6 @@ class _AuthScreenState extends State<AuthScreen>
 
   final _loginEmailCtrl = TextEditingController();
   final _loginPasswordCtrl = TextEditingController();
-  final _signupEmailCtrl = TextEditingController();
-  final _signupPasswordCtrl = TextEditingController();
 
   @override
   void initState() {
@@ -33,8 +31,6 @@ class _AuthScreenState extends State<AuthScreen>
     _tabController.dispose();
     _loginEmailCtrl.dispose();
     _loginPasswordCtrl.dispose();
-    _signupEmailCtrl.dispose();
-    _signupPasswordCtrl.dispose();
     super.dispose();
   }
 
@@ -70,29 +66,13 @@ class _AuthScreenState extends State<AuthScreen>
               : TabBarView(
                   controller: _tabController,
                   children: [
-                    _AuthForm(
+                    // ── Login tab ──────────────────────────────────────────
+                    _LoginForm(
                       emailCtrl: _loginEmailCtrl,
                       passwordCtrl: _loginPasswordCtrl,
-                      buttonLabel: 'Login',
-                      onSubmit: () {
-                        context.read<AuthBloc>().add(AuthLoginRequested(
-                              email: _loginEmailCtrl.text.trim(),
-                              password: _loginPasswordCtrl.text,
-                            ));
-                      },
                     ),
-                    _AuthForm(
-                      emailCtrl: _signupEmailCtrl,
-                      passwordCtrl: _signupPasswordCtrl,
-                      buttonLabel: 'Sign Up',
-                      onSubmit: () {
-                        context.read<AuthBloc>().add(AuthSignUpRequested(
-                              email: _signupEmailCtrl.text.trim(),
-                              password: _signupPasswordCtrl.text,
-                              role: widget.defaultRole,
-                            ));
-                      },
-                    ),
+                    // ── Sign-up tab ────────────────────────────────────────
+                    _SignUpForm(defaultRole: widget.defaultRole),
                   ],
                 ),
         );
@@ -101,18 +81,13 @@ class _AuthScreenState extends State<AuthScreen>
   }
 }
 
-class _AuthForm extends StatelessWidget {
+// ── Login form ────────────────────────────────────────────────────────────────
+
+class _LoginForm extends StatelessWidget {
   final TextEditingController emailCtrl;
   final TextEditingController passwordCtrl;
-  final String buttonLabel;
-  final VoidCallback onSubmit;
 
-  const _AuthForm({
-    required this.emailCtrl,
-    required this.passwordCtrl,
-    required this.buttonLabel,
-    required this.onSubmit,
-  });
+  const _LoginForm({required this.emailCtrl, required this.passwordCtrl});
 
   @override
   Widget build(BuildContext context) {
@@ -133,6 +108,7 @@ class _AuthForm extends StatelessWidget {
                 ),
                 keyboardType: TextInputType.emailAddress,
                 autofillHints: const [AutofillHints.email],
+                textInputAction: TextInputAction.next,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -143,13 +119,137 @@ class _AuthForm extends StatelessWidget {
                 ),
                 obscureText: true,
                 autofillHints: const [AutofillHints.password],
+                textInputAction: TextInputAction.done,
+                onSubmitted: (_) => context.read<AuthBloc>().add(
+                      AuthLoginRequested(
+                        email: emailCtrl.text.trim(),
+                        password: passwordCtrl.text,
+                      ),
+                    ),
               ),
               const SizedBox(height: 24),
               FilledButton(
-                onPressed: onSubmit,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  child: Text(buttonLabel),
+                onPressed: () => context.read<AuthBloc>().add(
+                      AuthLoginRequested(
+                        email: emailCtrl.text.trim(),
+                        password: passwordCtrl.text,
+                      ),
+                    ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Login'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Sign-up form ──────────────────────────────────────────────────────────────
+
+class _SignUpForm extends StatefulWidget {
+  final String defaultRole;
+
+  const _SignUpForm({required this.defaultRole});
+
+  @override
+  State<_SignUpForm> createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<_SignUpForm> {
+  final _emailCtrl = TextEditingController();
+  final _passwordCtrl = TextEditingController();
+  final _nameCtrl = TextEditingController();
+  final _rollCtrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    _passwordCtrl.dispose();
+    _nameCtrl.dispose();
+    _rollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    context.read<AuthBloc>().add(AuthSignUpRequested(
+          email: _emailCtrl.text.trim(),
+          password: _passwordCtrl.text,
+          role: widget.defaultRole,
+          displayName: _nameCtrl.text.trim(),
+          rollNumber: widget.defaultRole == 'student' ? _rollCtrl.text.trim() : null,
+        ));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isStudent = widget.defaultRole == 'student';
+
+    return Center(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _emailCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Email',
+                  border: OutlineInputBorder(),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                autofillHints: const [AutofillHints.email],
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _passwordCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Password',
+                  border: OutlineInputBorder(),
+                ),
+                obscureText: true,
+                autofillHints: const [AutofillHints.newPassword],
+                textInputAction: TextInputAction.next,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _nameCtrl,
+                decoration: const InputDecoration(
+                  labelText: 'Display name',
+                  border: OutlineInputBorder(),
+                  hintText: 'Your full name',
+                ),
+                textCapitalization: TextCapitalization.words,
+                textInputAction:
+                    isStudent ? TextInputAction.next : TextInputAction.done,
+                onSubmitted: isStudent ? null : (_) => _submit(),
+              ),
+              if (isStudent) ...[
+                const SizedBox(height: 16),
+                TextField(
+                  controller: _rollCtrl,
+                  decoration: const InputDecoration(
+                    labelText: 'Roll number (optional)',
+                    border: OutlineInputBorder(),
+                    hintText: 'e.g. 2024CS101',
+                  ),
+                  textInputAction: TextInputAction.done,
+                  onSubmitted: (_) => _submit(),
+                ),
+              ],
+              const SizedBox(height: 24),
+              FilledButton(
+                onPressed: _submit,
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Sign Up'),
                 ),
               ),
             ],

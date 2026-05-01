@@ -32,3 +32,9 @@ class AiKeyError extends AiKeyState {
   @override
   List<Object?> get props => [message];
 }
+
+/// Emitted when the RPC returns a permission error — key has expired or
+/// the user lacks access.  The UI shows a "contact administrator" dialog.
+class AiKeyExpired extends AiKeyState {
+  const AiKeyExpired();
+}

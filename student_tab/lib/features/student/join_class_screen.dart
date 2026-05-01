@@ -60,7 +60,7 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
             SnackBar(
               content:
                   Text('Joined "${state.justJoinedClassName}" successfully!'),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.primary,
             ),
           );
         }
@@ -68,12 +68,28 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text('EduForge'),
+            title: BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) {
+                final name = authState is Authenticated
+                    ? authState.displayName
+                    : null;
+                return Text(
+                  name != null && name.isNotEmpty
+                      ? 'Hello, $name'
+                      : 'EduForge',
+                );
+              },
+            ),
             actions: [
               IconButton(
                 icon: const Icon(Icons.brightness_6),
                 tooltip: 'Toggle theme',
                 onPressed: () => context.read<ThemeCubit>().toggleTheme(),
+              ),
+              IconButton(
+                icon: const Icon(Icons.person_outline),
+                tooltip: 'My profile',
+                onPressed: () => context.push('/profile'),
               ),
               IconButton(
                 icon: const Icon(Icons.logout),
@@ -142,11 +158,11 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
                   FilledButton.icon(
                     onPressed: isLoading ? null : _submit,
                     icon: isLoading
-                        ? const SizedBox.square(
+                        ? SizedBox.square(
                             dimension: 16,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              color: Colors.white,
+                              color: Theme.of(context).colorScheme.onPrimary,
                             ),
                           )
                         : const Icon(Icons.login),

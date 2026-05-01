@@ -10,3 +10,8 @@ abstract class AiKeyEvent extends Equatable {
 class FetchAiKey extends AiKeyEvent {
   const FetchAiKey();
 }
+
+/// Forces a fresh RPC call, evicting any cached key.
+class RefreshAiKey extends AiKeyEvent {
+  const RefreshAiKey();
+}

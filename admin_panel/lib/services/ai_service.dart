@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:eduforge_core/eduforge_core.dart';
 import 'package:http/http.dart' as http;
 
 import '../models/generation_result.dart';
@@ -11,8 +12,6 @@ class AiService {
   static const _endpoint =
       'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent';
   static const _timeout = Duration(seconds: 60);
-  static const _maxContentChars = 8000;
-
   final String _apiKey;
   final String _topicTitle;
   final String _lessonContent;
@@ -23,9 +22,7 @@ class AiService {
     required String lessonContent,
   })  : _apiKey = apiKey,
         _topicTitle = topicTitle,
-        _lessonContent = lessonContent.length > _maxContentChars
-            ? '${lessonContent.substring(0, _maxContentChars)}\n[Truncated]'
-            : lessonContent;
+        _lessonContent = InputSanitiser.sanitiseAndTruncate(lessonContent);
 
   // ── Internal HTTP helper ──────────────────────────────────────────────────
 

@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../../bloc/draft/draft_cubit.dart';
 import '../../bloc/generation/generation_bloc.dart';
@@ -38,6 +40,8 @@ class _PreviewScreenState extends State<PreviewScreen>
   late String _lessonContent;
   // Non-null when editing an already-published topic (republish mode)
   String? _topicId;
+
+  final _supabase = Supabase.instance.client;
 
   @override
   void initState() {
@@ -108,6 +112,94 @@ class _PreviewScreenState extends State<PreviewScreen>
     context
         .read<GenerationBloc>()
         .add(PublishTopic(_currentResult, lessonContent: _lessonContent));
+  }
+
+  Future<void> _editTitle() async {
+    final ctrl = TextEditingController(text: _topicTitle);
+    final newTitle = await showDialog<String>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        title: const Text('Edit Title'),
+        content: SizedBox(
+          width: 360,
+          child: TextField(
+            controller: ctrl,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Topic title',
+              border: OutlineInputBorder(),
+            ),
+            textInputAction: TextInputAction.done,
+            onSubmitted: (v) => Navigator.of(dlgCtx).pop(v.trim()),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(ctrl.text.trim()),
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+    ctrl.dispose();
+    if (newTitle == null || newTitle.isEmpty || newTitle == _topicTitle) return;
+    try {
+      if (_topicId != null) {
+        await _supabase
+            .from('topics')
+            .update({'title': newTitle}).eq('id', _topicId!);
+      }
+      setState(() => _topicTitle = newTitle);
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not update title: $e')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteTopic() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (dlgCtx) => AlertDialog(
+        icon: Icon(Icons.warning_amber_rounded,
+            color: Theme.of(context).colorScheme.error),
+        title: const Text('Delete Topic?'),
+        content: Text(
+          'Deleting "$_topicTitle" will also remove all its generated '
+          'materials. This cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dlgCtx).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+            onPressed: () => Navigator.of(dlgCtx).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirm != true) return;
+    try {
+      await _supabase.from('topics').delete().eq('id', _topicId!);
+      if (mounted) context.pop();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Delete failed: $e')),
+        );
+      }
+    }
   }
 
   @override
@@ -209,7 +301,52 @@ class _PreviewScreenState extends State<PreviewScreen>
                   icon: Icon(isExistingTopic ? Icons.sync : Icons.publish),
                   label: Text(isExistingTopic ? 'Update' : 'Publish'),
                 ),
-              const SizedBox(width: 8),
+              if (isExistingTopic)
+                PopupMenuButton<_TopicAction>(
+                  tooltip: 'More options',
+                  onSelected: (action) {
+                    switch (action) {
+                      case _TopicAction.editTitle:
+                        _editTitle();
+                      case _TopicAction.viewResults:
+                        context.push(
+                          '/teacher/classes/${widget.classId}/topics/$_topicId/results',
+                          extra: _topicTitle,
+                        );
+                      case _TopicAction.delete:
+                        _deleteTopic();
+                    }
+                  },
+                  itemBuilder: (_) => const [
+                    PopupMenuItem(
+                      value: _TopicAction.editTitle,
+                      child: ListTile(
+                        leading: Icon(Icons.edit_outlined),
+                        title: Text('Edit title'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: _TopicAction.viewResults,
+                      child: ListTile(
+                        leading: Icon(Icons.bar_chart_rounded),
+                        title: Text('View quiz results'),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                    PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: _TopicAction.delete,
+                      child: ListTile(
+                        leading: Icon(Icons.delete_outline, color: Colors.red),
+                        title: Text('Delete topic',
+                            style: TextStyle(color: Colors.red)),
+                        contentPadding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
+              const SizedBox(width: 4),
             ],
           ),
           body: TabBarView(
@@ -286,6 +423,8 @@ class _PreviewScreenState extends State<PreviewScreen>
     );
   }
 }
+
+enum _TopicAction { editTitle, viewResults, delete }
 
 // ── Tab wrapper with Regenerate button ───────────────────────────────────────
 

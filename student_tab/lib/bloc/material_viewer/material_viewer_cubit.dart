@@ -1,6 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:eduforge_core/eduforge_core.dart';
+
+import '../../data/repositories/material_repository.dart';
 import '../../models/study_materials.dart';
 
 // ── States ────────────────────────────────────────────────────────────────────
@@ -23,7 +26,7 @@ class MaterialViewerLoaded extends MaterialViewerState {
   final List<InfographicSection> infographicSections;
   final TableData? tableData;
   final Map<String, dynamic>? quizJson;
-  final String? quizMaterialId; // UUID of the quiz row in `materials`
+  final String? quizMaterialId;
 
   const MaterialViewerLoaded({
     required this.mindmapNodes,
@@ -43,62 +46,53 @@ class MaterialViewerError extends MaterialViewerState {
 // ── Cubit ─────────────────────────────────────────────────────────────────────
 
 class MaterialViewerCubit extends Cubit<MaterialViewerState> {
-  MaterialViewerCubit() : super(const MaterialViewerInitial());
+  MaterialViewerCubit({StudentMaterialRepository? repository})
+      : _repo = repository ??
+            StudentMaterialRepository(Supabase.instance.client),
+        super(const MaterialViewerInitial());
 
-  final _supabase = Supabase.instance.client;
+  final StudentMaterialRepository _repo;
 
   Future<void> loadMaterials(String topicId) async {
     emit(const MaterialViewerLoading());
     try {
-      final data = await _supabase
-          .from('materials')
-          .select('id, type, json_data')
-          .eq('topic_id', topicId);
+      final (:byType, :quizMaterialId) = await _repo.fetchMaterials(topicId);
 
-      // Build a type → json_data map; capture the quiz row's UUID separately.
-      final raw = <String, Map<String, dynamic>>{};
-      String? quizMaterialId;
-      for (final m in (data as List)) {
-        final type = m['type'] as String;
-        raw[type] = m['json_data'] as Map<String, dynamic>;
-        if (type == 'quiz') quizMaterialId = m['id'] as String;
-      }
-
-      // Mindmap: {"nodes": [...]}
-      final mindmapNodes = raw['mindmap'] != null
-          ? (raw['mindmap']!['nodes'] as List)
+      final mindmapNodes = byType['mindmap'] != null
+          ? (byType['mindmap']!['nodes'] as List)
               .map((n) => MindmapNode.fromJson(n as Map<String, dynamic>))
               .toList()
           : <MindmapNode>[];
 
-      // Flashcards: {"flashcards": [{term, definition}, ...]}
-      final flashcards = raw['flashcards'] != null
-          ? (raw['flashcards']!['flashcards'] as List)
+      final flashcards = byType['flashcards'] != null
+          ? (byType['flashcards']!['flashcards'] as List)
               .map((f) => Flashcard.fromJson(f as Map<String, dynamic>))
               .toList()
           : <Flashcard>[];
 
-      // Infographic: {"sections": [...]}
-      final infographicSections = raw['infographic'] != null
-          ? (raw['infographic']!['sections'] as List)
+      final infographicSections = byType['infographic'] != null
+          ? (byType['infographic']!['sections'] as List)
               .map((s) =>
                   InfographicSection.fromJson(s as Map<String, dynamic>))
               .toList()
           : <InfographicSection>[];
 
-      // Table: {"headers": [...], "rows": [[...]]}
       final tableData =
-          raw['table'] != null ? TableData.fromJson(raw['table']!) : null;
+          byType['table'] != null ? TableData.fromJson(byType['table']!) : null;
 
       emit(MaterialViewerLoaded(
         mindmapNodes: mindmapNodes,
         flashcards: flashcards,
         infographicSections: infographicSections,
         tableData: tableData,
-        quizJson: raw['quiz'],
+        quizJson: byType['quiz'],
         quizMaterialId: quizMaterialId,
       ));
-    } catch (e) {
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'MaterialViewerCubit');
+      emit(MaterialViewerError(e.message));
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'MaterialViewerCubit');
       emit(MaterialViewerError(e.toString()));
     }
   }

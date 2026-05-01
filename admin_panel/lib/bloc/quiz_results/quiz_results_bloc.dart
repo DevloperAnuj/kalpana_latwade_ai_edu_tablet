@@ -2,30 +2,39 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:eduforge_core/eduforge_core.dart';
+
+import '../../data/repositories/quiz_repository.dart';
 import '../../models/generation_result.dart';
 
 part 'quiz_results_event.dart';
 part 'quiz_results_state.dart';
 
 class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
-  QuizResultsBloc() : super(const QuizResultsInitial()) {
+  QuizResultsBloc({QuizRepository? repository})
+      : _repo = repository ?? QuizRepository(Supabase.instance.client),
+        super(const QuizResultsInitial()) {
     on<LoadQuizResults>(_onLoad);
+    on<LoadMoreResults>(_onLoadMore);
     on<RefreshQuizResults>(_onRefresh);
     on<RealtimeAttemptReceived>(_onRealtimeAttempt);
   }
 
-  final _supabase = Supabase.instance.client;
+  final QuizRepository _repo;
   RealtimeChannel? _channel;
+
+  static const _pageSize = 20;
 
   // ── Helpers ────────────────────────────────────────────────────────────────
 
   List<WrongAnswer> _computeWrongAnswers(
-    List<int> answers,
+    Map<String, int> answers,
     List<QuizQuestion> questions,
   ) {
     final result = <WrongAnswer>[];
-    for (var i = 0; i < questions.length && i < answers.length; i++) {
-      final chosen = answers[i];
+    for (var i = 0; i < questions.length; i++) {
+      final chosen = answers['$i'];
+      if (chosen == null) continue;
       final q = questions[i];
       if (chosen != q.correct) {
         result.add(WrongAnswer(
@@ -42,18 +51,21 @@ class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
     return result;
   }
 
-  List<int> _parseAnswers(dynamic raw) {
-    if (raw is List) {
-      return raw.map((e) => (e as num).toInt()).toList();
+  Map<String, int> _parseAnswers(dynamic raw) {
+    if (raw is Map) {
+      return raw.map((k, v) => MapEntry(k.toString(), (v as num).toInt()));
     }
-    return [];
+    // Legacy: list format from pre-migration rows
+    if (raw is List) {
+      return {for (var i = 0; i < raw.length; i++) '$i': (raw[i] as num).toInt()};
+    }
+    return {};
   }
 
-  Future<List<StudentResult>> _buildResults(
+  List<StudentResult> _buildResults(
     List<Map<String, dynamic>> attempts,
     List<QuizQuestion> questions,
-  ) async {
-    // Keep only the most recent attempt per student (list is already DESC)
+  ) {
     final seen = <String>{};
     final unique = <Map<String, dynamic>>[];
     for (final a in attempts) {
@@ -67,21 +79,23 @@ class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
           (profile?['display_name'] as String?)?.trim().isNotEmpty == true
               ? profile!['display_name'] as String
               : 'Student';
-      final answers = _parseAnswers(a['answers']);
+      final rollNumber = profile?['roll_number'] as String?;
+      final answers = _parseAnswers(a['answers_json']);
       final score = (a['score'] as num?)?.toInt() ?? 0;
       return StudentResult(
         studentId: a['student_id'] as String,
         studentName: name,
+        rollNumber: rollNumber,
         score: score,
         total: questions.length,
         wrongAnswers: _computeWrongAnswers(answers, questions),
-        submittedAt: DateTime.parse(a['attempted_at'] as String).toLocal(),
+        submittedAt: DateTime.parse(a['submitted_at'] as String).toLocal(),
       );
     }).toList();
   }
 
   void _subscribeRealtime(String topicId, String quizMaterialId) {
-    _channel = _supabase
+    _channel = Supabase.instance.client
         .channel('quiz_results_$topicId')
         .onPostgresChanges(
           event: PostgresChangeEvent.insert,
@@ -109,49 +123,78 @@ class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
   ) async {
     emit(const QuizResultsLoading());
     try {
-      // 1. Fetch quiz material
-      final matRow = await _supabase
-          .from('materials')
-          .select('id, json_data')
-          .eq('topic_id', event.topicId)
-          .eq('type', 'quiz')
-          .single();
+      final (:materialId, :questions) =
+          await _repo.fetchQuizMaterial(event.topicId);
 
-      final quizMaterialId = matRow['id'] as String;
-      final questions =
-          Quiz.fromJson(matRow['json_data'] as Map<String, dynamic>).questions;
-
-      // 2. Fetch all attempts with student display names (DESC so most-recent first)
-      final attemptsRaw = await _supabase
-          .from('quiz_attempts')
-          .select('student_id, answers, score, attempted_at, profiles(display_name)')
-          .eq('material_id', quizMaterialId)
-          .order('attempted_at', ascending: false);
-
-      final attempts = (attemptsRaw as List).cast<Map<String, dynamic>>();
-
-      // 3. Enrolled student count
-      final enrolledRaw = await _supabase
-          .from('class_students')
-          .select('student_id')
-          .eq('class_id', event.classId);
-      final totalEnrolled = (enrolledRaw as List).length;
-
-      final studentResults = await _buildResults(attempts, questions);
+      final rawAttempts = await _repo.fetchAttempts(
+        materialId,
+        page: 0,
+        pageSize: _pageSize,
+      );
+      final totalEnrolled = await _repo.fetchEnrolledCount(event.classId);
+      final studentResults = _buildResults(rawAttempts, questions);
 
       emit(QuizResultsLoaded(
         questions: questions,
         studentResults: studentResults,
         totalEnrolled: totalEnrolled,
-        quizMaterialId: quizMaterialId,
+        quizMaterialId: materialId,
         topicId: event.topicId,
         classId: event.classId,
+        currentPage: 0,
+        hasMore: rawAttempts.length == _pageSize,
       ));
 
-      // Subscribe for live updates after emitting the initial state
-      _subscribeRealtime(event.topicId, quizMaterialId);
-    } catch (e) {
+      _subscribeRealtime(event.topicId, materialId);
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'QuizResultsBloc.Load');
+      emit(QuizResultsError(e.message));
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'QuizResultsBloc.Load');
       emit(QuizResultsError(e.toString()));
+    }
+  }
+
+  Future<void> _onLoadMore(
+    LoadMoreResults event,
+    Emitter<QuizResultsState> emit,
+  ) async {
+    final current = state;
+    if (current is! QuizResultsLoaded || !current.hasMore || current.isLoadingMore) {
+      return;
+    }
+
+    emit(current.copyWith(isLoadingMore: true));
+
+    try {
+      final nextPage = current.currentPage + 1;
+      final rawAttempts = await _repo.fetchAttempts(
+        current.quizMaterialId,
+        page: nextPage,
+        pageSize: _pageSize,
+      );
+      final newResults = _buildResults(rawAttempts, current.questions);
+
+      // Merge, keeping only most-recent per student
+      final merged = List<StudentResult>.from(current.studentResults);
+      for (final r in newResults) {
+        if (!merged.any((e) => e.studentId == r.studentId)) {
+          merged.add(r);
+        }
+      }
+
+      emit(current.copyWith(
+        studentResults: merged,
+        currentPage: nextPage,
+        hasMore: rawAttempts.length == _pageSize,
+        isLoadingMore: false,
+      ));
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'QuizResultsBloc.LoadMore');
+      emit(current.copyWith(isLoadingMore: false));
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'QuizResultsBloc.LoadMore');
+      emit(current.copyWith(isLoadingMore: false));
     }
   }
 
@@ -162,8 +205,7 @@ class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
     final current = state;
     if (current is QuizResultsLoaded) {
       await _onLoad(
-        LoadQuizResults(
-            topicId: current.topicId, classId: current.classId),
+        LoadQuizResults(topicId: current.topicId, classId: current.classId),
         emit,
       );
     }
@@ -179,67 +221,50 @@ class QuizResultsBloc extends Bloc<QuizResultsEvent, QuizResultsState> {
     final record = event.record;
     final studentId = record['student_id'] as String? ?? '';
     final score = (record['score'] as num?)?.toInt() ?? 0;
-    final answers = _parseAnswers(record['answers']);
-    final attemptedAt = record['attempted_at'] != null
-        ? DateTime.parse(record['attempted_at'] as String).toLocal()
+    final answers = _parseAnswers(record['answers_json']);
+    final submittedAt = record['submitted_at'] != null
+        ? DateTime.parse(record['submitted_at'] as String).toLocal()
         : DateTime.now();
 
-    // Look up student name from existing results; fetch from DB if new student
-    String studentName =
-        current.studentResults
-            .where((r) => r.studentId == studentId)
-            .map((r) => r.studentName)
-            .firstOrNull ??
-        '';
+    final existing = current.studentResults
+        .where((r) => r.studentId == studentId)
+        .firstOrNull;
+
+    String studentName = existing?.studentName ?? '';
+    String? rollNumber = existing?.rollNumber;
 
     if (studentName.isEmpty) {
-      try {
-        final profile = await _supabase
-            .from('profiles')
-            .select('display_name')
-            .eq('id', studentId)
-            .single();
-        final raw = profile['display_name'] as String?;
-        studentName =
-            (raw?.trim().isNotEmpty == true) ? raw! : 'Student';
-      } catch (_) {
-        studentName = 'Student';
-      }
+      final profile = await _repo.fetchStudentProfile(studentId);
+      studentName = profile.name;
+      rollNumber = profile.rollNumber;
     }
 
     final newResult = StudentResult(
       studentId: studentId,
       studentName: studentName,
+      rollNumber: rollNumber,
       score: score,
       total: current.questions.length,
       wrongAnswers: _computeWrongAnswers(answers, current.questions),
-      submittedAt: attemptedAt,
+      submittedAt: submittedAt,
     );
 
     final updatedResults = List<StudentResult>.from(current.studentResults);
     final idx = updatedResults.indexWhere((r) => r.studentId == studentId);
     if (idx >= 0) {
-      updatedResults[idx] = newResult; // replace with latest attempt
+      updatedResults[idx] = newResult;
     } else {
       updatedResults.insert(0, newResult);
     }
-    // Keep sorted newest first
     updatedResults.sort((a, b) => b.submittedAt.compareTo(a.submittedAt));
 
-    emit(QuizResultsLoaded(
-      questions: current.questions,
-      studentResults: updatedResults,
-      totalEnrolled: current.totalEnrolled,
-      quizMaterialId: current.quizMaterialId,
-      topicId: current.topicId,
-      classId: current.classId,
-    ));
+    emit(current.copyWith(studentResults: updatedResults));
   }
 
   @override
   Future<void> close() async {
     if (_channel != null) {
-      await _supabase.removeChannel(_channel!);
+      await Supabase.instance.client.removeChannel(_channel!);
     }
     return super.close();
   }

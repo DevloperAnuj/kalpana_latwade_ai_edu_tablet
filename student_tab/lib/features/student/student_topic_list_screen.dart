@@ -63,8 +63,9 @@ class _StudentTopicListScreenState extends State<StudentTopicListScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.cloud_off,
-                      size: 48, color: Colors.grey),
+                  Icon(Icons.cloud_off,
+                      size: 48,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   const SizedBox(height: 12),
                   Text(
                     snapshot.error.toString(),

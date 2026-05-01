@@ -45,6 +45,7 @@ class WrongAnswer {
 class StudentResult {
   final String studentId;
   final String studentName;
+  final String? rollNumber;
   final int score;
   final int total;
   final List<WrongAnswer> wrongAnswers;
@@ -53,6 +54,7 @@ class StudentResult {
   const StudentResult({
     required this.studentId,
     required this.studentName,
+    this.rollNumber,
     required this.score,
     required this.total,
     required this.wrongAnswers,
@@ -71,6 +73,9 @@ class QuizResultsLoaded extends QuizResultsState {
   final String quizMaterialId;
   final String topicId;
   final String classId;
+  final int currentPage;
+  final bool hasMore;
+  final bool isLoadingMore;
 
   const QuizResultsLoaded({
     required this.questions,
@@ -79,7 +84,28 @@ class QuizResultsLoaded extends QuizResultsState {
     required this.quizMaterialId,
     required this.topicId,
     required this.classId,
+    this.currentPage = 0,
+    this.hasMore = false,
+    this.isLoadingMore = false,
   });
+
+  QuizResultsLoaded copyWith({
+    List<StudentResult>? studentResults,
+    int? currentPage,
+    bool? hasMore,
+    bool? isLoadingMore,
+  }) =>
+      QuizResultsLoaded(
+        questions: questions,
+        studentResults: studentResults ?? this.studentResults,
+        totalEnrolled: totalEnrolled,
+        quizMaterialId: quizMaterialId,
+        topicId: topicId,
+        classId: classId,
+        currentPage: currentPage ?? this.currentPage,
+        hasMore: hasMore ?? this.hasMore,
+        isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      );
 
   int get submittedCount => studentResults.length;
 
@@ -97,5 +123,8 @@ class QuizResultsLoaded extends QuizResultsState {
         quizMaterialId,
         topicId,
         classId,
+        currentPage,
+        hasMore,
+        isLoadingMore,
       ];
 }

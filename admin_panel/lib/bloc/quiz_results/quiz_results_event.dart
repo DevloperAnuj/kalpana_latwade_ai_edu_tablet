@@ -30,3 +30,8 @@ class RealtimeAttemptReceived extends QuizResultsEvent {
   @override
   List<Object?> get props => [record];
 }
+
+/// Fetches the next page of student results.
+class LoadMoreResults extends QuizResultsEvent {
+  const LoadMoreResults();
+}

@@ -10,6 +10,7 @@ import 'bloc/class_selection/class_selection_cubit.dart';
 import 'bloc/draft/draft_cubit.dart';
 import 'bloc/generation/generation_bloc.dart';
 
+
 class EduForgeApp extends StatelessWidget {
   final AuthBloc authBloc;
   final GoRouter router;
@@ -31,6 +32,7 @@ class EduForgeApp extends StatelessWidget {
         BlocProvider(create: (_) => ClassSelectionCubit()),
         BlocProvider(create: (_) => GenerationBloc()),
         BlocProvider(create: (_) => DraftCubit()),
+        BlocProvider(create: (_) => ProfileBloc()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

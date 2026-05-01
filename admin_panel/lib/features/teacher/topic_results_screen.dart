@@ -299,27 +299,70 @@ class _StatCard extends StatelessWidget {
 
 // ── Students tab ──────────────────────────────────────────────────────────────
 
-class _StudentsTab extends StatelessWidget {
+class _StudentsTab extends StatefulWidget {
   final QuizResultsLoaded state;
 
   const _StudentsTab({required this.state});
 
   @override
+  State<_StudentsTab> createState() => _StudentsTabState();
+}
+
+class _StudentsTabState extends State<_StudentsTab> {
+  final _scrollCtrl = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollCtrl.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollCtrl.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollCtrl.position.pixels >=
+        _scrollCtrl.position.maxScrollExtent - 200) {
+      context.read<QuizResultsBloc>().add(const LoadMoreResults());
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final state = widget.state;
     if (state.studentResults.isEmpty) {
-      return const Center(
-        child: Text('No quiz submissions yet.'),
-      );
+      return const Center(child: Text('No quiz submissions yet.'));
     }
 
     return ListView.separated(
+      controller: _scrollCtrl,
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
-      itemCount: state.studentResults.length,
-      separatorBuilder: (context, index) => const SizedBox(height: 8),
-      itemBuilder: (context, index) => _StudentCard(
-        result: state.studentResults[index],
-        questions: state.questions,
-      ),
+      itemCount: state.studentResults.length + (state.hasMore ? 1 : 0),
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        if (index == state.studentResults.length) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Center(
+              child: state.isLoadingMore
+                  ? const CircularProgressIndicator()
+                  : FilledButton.tonal(
+                      onPressed: () => context
+                          .read<QuizResultsBloc>()
+                          .add(const LoadMoreResults()),
+                      child: const Text('Load more'),
+                    ),
+            ),
+          );
+        }
+        return _StudentCard(
+          result: state.studentResults[index],
+          questions: state.questions,
+        );
+      },
     );
   }
 }
@@ -371,6 +414,7 @@ class _StudentCardState extends State<_StudentCard> {
             ),
             title: Text(r.studentName),
             subtitle: Text(
+              '${r.rollNumber != null ? '${r.rollNumber}  ·  ' : ''}'
               '${r.score} / ${r.total} correct  ·  ${_formatDate(r.submittedAt)}',
             ),
             trailing: Icon(

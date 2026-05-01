@@ -115,99 +115,6 @@ class _TopicsScreenState extends State<TopicsScreen>
     }
   }
 
-  // ── Edit title ────────────────────────────────────────────────────────────
-
-  Future<void> _editTitle(String topicId, String currentTitle) async {
-    final ctrl = TextEditingController(text: currentTitle);
-    final newTitle = await showDialog<String>(
-      context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('Edit Title'),
-        content: TextField(
-          controller: ctrl,
-          autofocus: true,
-          decoration: const InputDecoration(
-            labelText: 'Topic title',
-            border: OutlineInputBorder(),
-          ),
-          textInputAction: TextInputAction.done,
-          onSubmitted: (v) => Navigator.of(dialogContext).pop(v.trim()),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(dialogContext).pop(ctrl.text.trim()),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
-    );
-
-    ctrl.dispose();
-
-    if (newTitle == null || newTitle.isEmpty || newTitle == currentTitle) return;
-
-    try {
-      await _supabase
-          .from('topics')
-          .update({'title': newTitle})
-          .eq('id', topicId);
-      setState(_load);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not update title: $e')),
-        );
-      }
-    }
-  }
-
-  // ── Delete ────────────────────────────────────────────────────────────────
-
-  Future<void> _delete(String topicId, String title) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (_) => AlertDialog(
-        icon: Icon(Icons.warning_amber_rounded,
-            color: Theme.of(context).colorScheme.error),
-        title: const Text('Delete Topic?'),
-        content: Text(
-          'Deleting "$title" will also remove all its generated materials. '
-          'This cannot be undone.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Delete'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirm != true) return;
-
-    try {
-      await _supabase.from('topics').delete().eq('id', topicId);
-      setState(_load);
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Delete failed: $e')),
-        );
-      }
-    }
-  }
-
   // ── Resume local draft ────────────────────────────────────────────────────
 
   void _resumeDraft(DraftState draft) {
@@ -344,51 +251,20 @@ class _TopicsScreenState extends State<TopicsScreen>
                       ),
                 title: Text(title),
                 subtitle: Text(_formatDate(createdAt)),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Chip(
-                      label: Text(
-                        isPublished ? 'Published' : 'Draft',
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isPublished
-                              ? Theme.of(context).colorScheme.onPrimary
-                              : null,
-                        ),
-                      ),
-                      backgroundColor: isPublished
-                          ? Theme.of(context).colorScheme.primary
+                trailing: Chip(
+                  label: Text(
+                    isPublished ? 'Published' : 'Draft',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: isPublished
+                          ? Theme.of(context).colorScheme.onPrimary
                           : null,
-                      padding: EdgeInsets.zero,
                     ),
-                    if (isPublished)
-                      IconButton(
-                        icon: const Icon(Icons.bar_chart_rounded),
-                        tooltip: 'View quiz results',
-                        onPressed: _loadingTopicId != null
-                            ? null
-                            : () => context.push(
-                                  '/teacher/classes/${widget.classId}/topics/$topicId/results',
-                                  extra: title,
-                                ),
-                      ),
-                    IconButton(
-                      icon: const Icon(Icons.edit_outlined),
-                      tooltip: 'Edit title',
-                      onPressed: _loadingTopicId != null
-                          ? null
-                          : () => _editTitle(topicId, title),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.delete_outline),
-                      color: Theme.of(context).colorScheme.error,
-                      tooltip: 'Delete topic',
-                      onPressed: _loadingTopicId != null
-                          ? null
-                          : () => _delete(topicId, title),
-                    ),
-                  ],
+                  ),
+                  backgroundColor: isPublished
+                      ? Theme.of(context).colorScheme.primary
+                      : null,
+                  padding: EdgeInsets.zero,
                 ),
               ),
             );

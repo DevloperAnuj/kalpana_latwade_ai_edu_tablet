@@ -1,5 +1,5 @@
 name: student_tab
-description: "EduForge Student Tab - Android Tablet"
+description: "EduForge – AI-powered Student Tablet App"
 publish_to: 'none'
 resolution: workspace
 
@@ -25,6 +25,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+  rename: ^3.0.2
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "../eduforge_core/assets/logo.jpg"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "../eduforge_core/assets/logo.jpg"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true

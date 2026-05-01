@@ -61,10 +61,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         ));
         return;
       }
+
+      // Persist display name and optional roll number (non-fatal: user can
+      // always update via the profile screen later).
+      try {
+        final name = event.displayName?.trim() ?? '';
+        final update = <String, dynamic>{};
+        if (name.isNotEmpty) update['display_name'] = name;
+        if (event.role == 'student') {
+          final roll = event.rollNumber?.trim() ?? '';
+          if (roll.isNotEmpty) update['roll_number'] = roll;
+        }
+        if (update.isNotEmpty) {
+          await _supabase.from('profiles').update(update).eq('id', user.id);
+        }
+      } catch (_) {
+        // non-fatal
+      }
+
+      final savedName = event.displayName?.trim();
       emit(Authenticated(
         userId: user.id,
         role: event.role,
-        displayName: null,
+        displayName: (savedName?.isEmpty ?? true) ? null : savedName,
       ));
     } on AuthException catch (e) {
       emit(AuthError(e.message));

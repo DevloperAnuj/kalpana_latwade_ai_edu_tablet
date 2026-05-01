@@ -23,6 +23,7 @@ class EduForgeApp extends StatelessWidget {
         BlocProvider.value(value: authBloc),
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => StudentBloc()),
+        BlocProvider(create: (_) => ProfileBloc()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

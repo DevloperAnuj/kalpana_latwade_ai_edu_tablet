@@ -2,6 +2,10 @@ import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
+import 'package:eduforge_core/eduforge_core.dart';
+
+import '../../data/repositories/material_repository.dart';
+import '../../data/repositories/topic_repository.dart';
 import '../../models/generation_result.dart';
 import '../../services/ai_service.dart';
 
@@ -9,7 +13,14 @@ part 'generation_event.dart';
 part 'generation_state.dart';
 
 class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
-  GenerationBloc() : super(const GenerationInitial()) {
+  GenerationBloc({
+    TopicRepository? topicRepository,
+    MaterialRepository? materialRepository,
+  })  : _topicRepo = topicRepository ??
+            TopicRepository(Supabase.instance.client),
+        _materialRepo = materialRepository ??
+            MaterialRepository(Supabase.instance.client),
+        super(const GenerationInitial()) {
     on<GenerateStudyPack>(_onGenerate);
     on<RegenerateMaterial>(_onRegenerate);
     on<PublishTopic>(_onPublish);
@@ -17,23 +28,30 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     on<ResetGeneration>(_onReset);
   }
 
-  final _supabase = Supabase.instance.client;
+  final TopicRepository _topicRepo;
+  final MaterialRepository _materialRepo;
 
-  // In-memory key cache — never written to disk for security
+  // In-memory key cache — never written to disk
   String? _cachedApiKey;
 
-  // Current generation context (needed for RegenerateMaterial)
   String? _topicTitle;
   String? _lessonContent;
   String? _classId;
-  // Non-null when editing an existing published topic (used to skip insert on republish)
   String? _topicId;
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
   Future<String> _getApiKey() async {
-    _cachedApiKey ??= await _supabase.rpc<String>('get_gemini_api_key');
-    return _cachedApiKey!;
+    if (_cachedApiKey != null) return _cachedApiKey!;
+    try {
+      _cachedApiKey =
+          await Supabase.instance.client.rpc<String>('get_gemini_api_key');
+      return _cachedApiKey!;
+    } on PostgrestException catch (e) {
+      throw DatabaseException(e.message, e);
+    } catch (e) {
+      throw NetworkException('Could not retrieve API key: $e', e);
+    }
   }
 
   AiService _makeService(String apiKey) => AiService(
@@ -51,33 +69,45 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     _topicTitle = event.topicTitle;
     _lessonContent = event.lessonContent;
     _classId = event.classId;
-    _topicId = null; // new topic — clear any previously restored id
+    _topicId = null;
 
-    // Steps: key(0.05) mindmap(0.2) flashcards(0.4) infographic(0.6) table(0.8) quiz(1.0)
     emit(const GenerationLoading(step: 'Fetching AI key…', progress: 0.02));
+
+    // §2.4 Rate-limit check: max 10 AI generation calls per minute per teacher.
+    try {
+      final allowed = await Supabase.instance.client.rpc<bool>(
+        'check_and_increment_rate_limit',
+        params: {'p_action': 'ai_generate'},
+      );
+      if (!allowed) {
+        emit(const GenerationFailure(
+          error: 'Too many generation attempts. Please wait a minute.',
+          failedStep: 'Rate limit',
+        ));
+        return;
+      }
+    } catch (_) {
+      // If the RPC fails (e.g. function not yet deployed), continue gracefully.
+    }
 
     late String apiKey;
     try {
       apiKey = await _getApiKey();
-    } catch (e) {
-      emit(GenerationFailure(
-        error: 'Could not retrieve API key: $e',
-        failedStep: 'Fetching AI key',
-      ));
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'GenerationBloc.key');
+      emit(GenerationFailure(error: e.message, failedStep: 'Fetching AI key'));
       return;
     }
 
     final svc = _makeService(apiKey);
-
-    // 5-second gap between calls keeps 5 sequential requests well under
-    // Gemini free-tier 15 RPM limit.
     const callGap = Duration(seconds: 2);
 
     late Mindmap mindmap;
     emit(const GenerationLoading(step: 'Building mindmap…', progress: 0.15));
     try {
       mindmap = await svc.generateMindmap();
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.mindmap');
       emit(GenerationFailure(error: e.toString(), failedStep: 'Mindmap'));
       return;
     }
@@ -88,7 +118,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     emit(const GenerationLoading(step: 'Creating flashcards…', progress: 0.35));
     try {
       flashcards = await svc.generateFlashcards();
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.flashcards');
       emit(GenerationFailure(error: e.toString(), failedStep: 'Flashcards'));
       return;
     }
@@ -99,7 +130,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     emit(const GenerationLoading(step: 'Designing infographic…', progress: 0.55));
     try {
       infographic = await svc.generateInfographic();
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.infographic');
       emit(GenerationFailure(error: e.toString(), failedStep: 'Infographic'));
       return;
     }
@@ -110,7 +142,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     emit(const GenerationLoading(step: 'Building summary table…', progress: 0.73));
     try {
       table = await svc.generateTable();
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.table');
       emit(GenerationFailure(error: e.toString(), failedStep: 'Table'));
       return;
     }
@@ -121,7 +154,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     emit(const GenerationLoading(step: 'Writing quiz questions…', progress: 0.90));
     try {
       quiz = await svc.generateQuiz();
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.quiz');
       emit(GenerationFailure(error: e.toString(), failedStep: 'Quiz'));
       return;
     }
@@ -165,11 +199,9 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     late String apiKey;
     try {
       apiKey = await _getApiKey();
-    } catch (e) {
-      emit(GenerationFailure(
-        error: 'Could not retrieve API key: $e',
-        failedStep: 'Fetching AI key',
-      ));
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'GenerationBloc.regenKey');
+      emit(GenerationFailure(error: e.message, failedStep: 'Fetching AI key'));
       return;
     }
 
@@ -177,7 +209,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
 
     try {
       final updated = switch (event.materialType) {
-        'mindmap' => currentResult.copyWith(mindmap: await svc.generateMindmap()),
+        'mindmap' =>
+          currentResult.copyWith(mindmap: await svc.generateMindmap()),
         'flashcards' =>
           currentResult.copyWith(flashcards: await svc.generateFlashcards()),
         'infographic' =>
@@ -195,7 +228,9 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
         topicId: _topicId,
         updatedType: event.materialType,
       ));
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st,
+          context: 'GenerationBloc.regen.${event.materialType}');
       emit(GenerationFailure(
         error: e.toString(),
         failedStep: 'Regenerate ${event.materialType}',
@@ -214,60 +249,32 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
       classId: _classId!,
     ));
 
-    try {
-      final r = event.result;
-      final materials = {
-        'mindmap': r.mindmap.toJson(),
-        'flashcards': {'flashcards': r.flashcards.map((f) => f.toJson()).toList()},
-        'infographic': r.infographic.toJson(),
-        'table': r.table.toJson(),
-        'quiz': r.quiz.toJson(),
-      };
+    if (event.lessonContent != null) {
+      _lessonContent = event.lessonContent;
+    }
 
+    try {
       late String topicId;
 
-      // Sync lesson content if the teacher edited it in the Content tab
-      if (event.lessonContent != null) {
-        _lessonContent = event.lessonContent;
-      }
-
       if (_topicId != null) {
-        // Republish: update raw_content in case it was edited, then upsert materials
         topicId = _topicId!;
-        await _supabase.from('topics').update({
-          'raw_content': _lessonContent!,
-        }).eq('id', topicId);
+        await _topicRepo.updateRawContent(topicId, _lessonContent!);
       } else {
-        // New topic: insert row and capture its id
-        final userId = _supabase.auth.currentUser!.id;
-        final topicRow = await _supabase
-            .from('topics')
-            .insert({
-              'class_id': _classId!,
-              'teacher_id': userId,
-              'title': _topicTitle!,
-              'raw_content': _lessonContent!,
-              'status': 'published',
-            })
-            .select('id')
-            .single();
-        topicId = topicRow['id'] as String;
-        _topicId = topicId; // remember for any subsequent republish
+        final userId = Supabase.instance.client.auth.currentUser!.id;
+        topicId = await _topicRepo.createTopic(
+          classId: _classId!,
+          teacherId: userId,
+          title: _topicTitle!,
+          rawContent: _lessonContent!,
+        );
+        _topicId = topicId;
       }
 
-      for (final entry in materials.entries) {
-        await _supabase.from('materials').upsert(
-          {
-            'topic_id': topicId,
-            'type': entry.key,
-            'json_data': entry.value,
-          },
-          onConflict: 'topic_id, type',
-        );
-      }
+      await _materialRepo.upsertMaterials(topicId, event.result);
 
       emit(const PublishSuccess());
-    } on PostgrestException catch (e) {
+    } on AppException catch (e) {
+      ErrorLogger.instance.logError(e, null, context: 'GenerationBloc.Publish');
       emit(PublishFailure(
         error: e.message,
         result: event.result,
@@ -275,7 +282,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
         lessonContent: _lessonContent!,
         classId: _classId!,
       ));
-    } catch (e) {
+    } catch (e, st) {
+      ErrorLogger.instance.logError(e, st, context: 'GenerationBloc.Publish');
       emit(PublishFailure(
         error: e.toString(),
         result: event.result,

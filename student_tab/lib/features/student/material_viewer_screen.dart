@@ -71,7 +71,8 @@ class _MaterialViewerScreenState extends State<MaterialViewerScreen>
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.cloud_off, size: 48, color: Colors.grey),
+                  Icon(Icons.cloud_off, size: 48,
+                      color: Theme.of(context).colorScheme.outlineVariant),
                   const SizedBox(height: 12),
                   Text(state.message, textAlign: TextAlign.center),
                   const SizedBox(height: 16),
@@ -695,9 +696,9 @@ class _InfographicCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final cardBg = isDark ? const Color(0xFF1C2130) : Colors.white;
-    final bodyText = isDark ? Colors.white70 : Colors.black87;
+    final cs = Theme.of(context).colorScheme;
+    final cardBg = cs.surfaceContainerLow;
+    final bodyText = cs.onSurfaceVariant;
     final numStr = sectionNumber.toString().padLeft(2, '0');
 
     return Container(
@@ -727,8 +728,10 @@ class _InfographicCard extends StatelessWidget {
                 children: [
                   Text(
                     numStr,
-                    style: const TextStyle(
-                      color: Colors.white,
+                    style: TextStyle(
+                      color: accentColor.computeLuminance() > 0.5
+                          ? const Color(0xFF000000)
+                          : const Color(0xFFFFFFFF),
                       fontSize: 30,
                       fontWeight: FontWeight.w900,
                       height: 1,
