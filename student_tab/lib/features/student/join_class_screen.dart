@@ -15,29 +15,20 @@ class JoinClassScreen extends StatefulWidget {
 }
 
 class _JoinClassScreenState extends State<JoinClassScreen> {
-  final _codeCtrl = TextEditingController();
-
   @override
   void initState() {
     super.initState();
     context.read<StudentBloc>().add(const LoadJoinedClasses());
   }
 
-  @override
-  void dispose() {
-    _codeCtrl.dispose();
-    super.dispose();
-  }
-
-  void _submit() {
-    final code = _codeCtrl.text.trim();
-    if (code.length != 6) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a 6-character join code.')),
-      );
-      return;
-    }
-    context.read<StudentBloc>().add(JoinClassWithCode(code));
+  void _showJoinDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: context.read<StudentBloc>(),
+        child: const _JoinClassDialog(),
+      ),
+    );
   }
 
   @override
@@ -55,7 +46,6 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
         }
         if (state is StudentClassesLoaded &&
             state.justJoinedClassName != null) {
-          _codeCtrl.clear();
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content:
@@ -66,6 +56,12 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
         }
       },
       builder: (context, state) {
+        final classes = state is StudentClassesLoaded
+            ? state.classes
+            : <Map<String, dynamic>>[];
+        final isLoading = state is StudentLoading;
+        final hasClasses = classes.isNotEmpty;
+
         return Scaffold(
           appBar: AppBar(
             title: BlocBuilder<AuthBloc, AuthState>(
@@ -74,9 +70,7 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
                     ? authState.displayName
                     : null;
                 return Text(
-                  name != null && name.isNotEmpty
-                      ? 'Hello, $name'
-                      : 'EduForge',
+                  name != null && name.isNotEmpty ? 'Hello, $name' : 'EduForge',
                 );
               },
             ),
@@ -99,143 +93,76 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
               ),
             ],
           ),
-          body: _buildBody(context, state),
+          body: _buildBody(context, classes, isLoading),
+          floatingActionButton: hasClasses
+              ? null
+              : FloatingActionButton.extended(
+                  onPressed: _showJoinDialog,
+                  icon: const Icon(Icons.add),
+                  label: const Text('Join Class'),
+                ),
         );
       },
     );
   }
 
-  Widget _buildBody(BuildContext context, StudentState state) {
-    final classes = state is StudentClassesLoaded
-        ? state.classes
-        : <Map<String, dynamic>>[];
-    final isLoading = state is StudentLoading;
+  Widget _buildBody(
+    BuildContext context,
+    List<Map<String, dynamic>> classes,
+    bool isLoading,
+  ) {
+    if (isLoading && classes.isEmpty) {
+      return const Center(child: CircularProgressIndicator());
+    }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ── Join code card ────────────────────────────────────────────────
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    'Join a Class',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Enter the 6-character code from your teacher.',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _codeCtrl,
-                    decoration: const InputDecoration(
-                      labelText: 'Join Code',
-                      border: OutlineInputBorder(),
-                      hintText: 'e.g. ABC123',
-                      prefixIcon: Icon(Icons.vpn_key_outlined),
-                      counterText: '',
-                    ),
-                    textCapitalization: TextCapitalization.characters,
-                    maxLength: 6,
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(
-                          RegExp(r'[A-Za-z0-9]')),
-                      _UpperCaseFormatter(),
-                    ],
-                    onSubmitted: (_) => _submit(),
-                  ),
-                  const SizedBox(height: 12),
-                  FilledButton.icon(
-                    onPressed: isLoading ? null : _submit,
-                    icon: isLoading
-                        ? SizedBox.square(
-                            dimension: 16,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                          )
-                        : const Icon(Icons.login),
-                    label: Text(isLoading ? 'Joining…' : 'Join'),
-                  ),
-                ],
+    if (classes.isEmpty) {
+      return _EmptyClassList(onJoin: _showJoinDialog);
+    }
+
+    return ListView.separated(
+      padding: const EdgeInsets.all(16),
+      itemCount: classes.length,
+      separatorBuilder: (_, _) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final cls = classes[index];
+        return Card(
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor:
+                  Theme.of(context).colorScheme.primaryContainer,
+              child: Icon(
+                Icons.school_outlined,
+                color: Theme.of(context).colorScheme.onPrimaryContainer,
               ),
             ),
-          ),
-
-          const SizedBox(height: 32),
-
-          // ── My classes ────────────────────────────────────────────────────
-          Text(
-            'My Classes',
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 12),
-
-          if (isLoading && classes.isEmpty)
-            const Center(
-              child: Padding(
-                padding: EdgeInsets.all(32),
-                child: CircularProgressIndicator(),
+            title: Text(cls['name'] as String),
+            trailing: FilledButton.tonal(
+              onPressed: () => context.push(
+                '/student/classes/${cls['id']}/topics',
+                extra: cls['name'] as String,
               ),
-            )
-          else if (classes.isEmpty)
-            _EmptyClassList()
-          else
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: classes.length,
-              separatorBuilder: (context, index) => const SizedBox(height: 8),
-              itemBuilder: (context, index) {
-                final cls = classes[index];
-                return Card(
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
-                      child: Icon(
-                        Icons.school_outlined,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimaryContainer,
-                      ),
-                    ),
-                    title: Text(cls['name'] as String),
-                    trailing: FilledButton.tonal(
-                      onPressed: () => context.push(
-                        '/student/classes/${cls['id']}/topics',
-                        extra: cls['name'] as String,
-                      ),
-                      child: const Text('View Topics'),
-                    ),
-                  ),
-                );
-              },
+              child: const Text('View Topics'),
             ),
-        ],
-      ),
+          ),
+        );
+      },
     );
   }
 }
 
+// ── Empty state ───────────────────────────────────────────────────────────────
+
 class _EmptyClassList extends StatelessWidget {
+  final VoidCallback onJoin;
+  const _EmptyClassList({required this.onJoin});
+
   @override
   Widget build(BuildContext context) {
     return Center(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 48),
+        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               Icons.school_outlined,
@@ -246,15 +173,135 @@ class _EmptyClassList extends StatelessWidget {
             Text(
               "You haven't joined any class yet.",
               style: Theme.of(context).textTheme.titleMedium,
+              textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
-            const Text('Enter a join code above to get started.'),
+            const Text(
+              'Tap the button below to get started.',
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: onJoin,
+              icon: const Icon(Icons.add),
+              label: const Text('Join Class'),
+            ),
           ],
         ),
       ),
     );
   }
 }
+
+// ── Join dialog ───────────────────────────────────────────────────────────────
+
+class _JoinClassDialog extends StatefulWidget {
+  const _JoinClassDialog();
+
+  @override
+  State<_JoinClassDialog> createState() => _JoinClassDialogState();
+}
+
+class _JoinClassDialogState extends State<_JoinClassDialog> {
+  final _ctrl = TextEditingController();
+
+  @override
+  void dispose() {
+    _ctrl.dispose();
+    super.dispose();
+  }
+
+  void _submit(BuildContext context) {
+    final code = _ctrl.text.trim();
+    if (code.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text('Please enter a 6-character join code.')),
+      );
+      return;
+    }
+    context.read<StudentBloc>().add(JoinClassWithCode(code));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<StudentBloc, StudentState>(
+      listener: (context, state) {
+        if (state is StudentClassesLoaded &&
+            state.justJoinedClassName != null) {
+          Navigator.of(context).pop();
+        }
+        if (state is StudentError) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+              backgroundColor: Theme.of(context).colorScheme.error,
+            ),
+          );
+        }
+      },
+      builder: (context, state) {
+        final isLoading = state is StudentLoading;
+
+        return AlertDialog(
+          title: const Text('Join a Class'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Enter the 6-character code from your teacher.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: _ctrl,
+                autofocus: true,
+                decoration: const InputDecoration(
+                  labelText: 'Join Code',
+                  border: OutlineInputBorder(),
+                  hintText: 'e.g. ABC123',
+                  prefixIcon: Icon(Icons.vpn_key_outlined),
+                  counterText: '',
+                ),
+                textCapitalization: TextCapitalization.characters,
+                maxLength: 6,
+                inputFormatters: [
+                  FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                  _UpperCaseFormatter(),
+                ],
+                onSubmitted: isLoading ? null : (_) => _submit(context),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: isLoading ? null : () => Navigator.of(context).pop(),
+              child: const Text('Cancel'),
+            ),
+            FilledButton.icon(
+              onPressed: isLoading ? null : () => _submit(context),
+              icon: isLoading
+                  ? SizedBox.square(
+                      dimension: 16,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                    )
+                  : const Icon(Icons.login),
+              label: Text(isLoading ? 'Joining…' : 'Join'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// ── Formatters ────────────────────────────────────────────────────────────────
 
 class _UpperCaseFormatter extends TextInputFormatter {
   @override

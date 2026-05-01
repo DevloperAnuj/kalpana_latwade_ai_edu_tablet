@@ -121,15 +121,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           backgroundColor: Theme.of(context).colorScheme.primary,
                           padding: EdgeInsets.zero,
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '(cannot be changed)',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Theme.of(context)
-                                    .colorScheme
-                                    .onSurfaceVariant,
-                              ),
-                        ),
                       ],
                     ),
 

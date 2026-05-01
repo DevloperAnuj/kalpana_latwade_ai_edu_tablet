@@ -865,10 +865,11 @@ class _TableTab extends StatelessWidget {
 }
 
 // ════════════════════════════════════════════════════════════════════════════
-// Quiz tab – Phase 9
+// Quiz tab – one attempt per student per topic
 // ════════════════════════════════════════════════════════════════════════════
 
-enum _QuizPhase { taking, submitting, done }
+// loading = checking DB for prior attempt before showing anything
+enum _QuizPhase { loading, taking, submitting, done }
 
 class _WrongAnswer {
   final int index;
@@ -913,14 +914,17 @@ class _QuizTab extends StatefulWidget {
 class _QuizTabState extends State<_QuizTab> {
   List<QuizQuestion> _questions = [];
   List<int?> _selected = [];
-  _QuizPhase _phase = _QuizPhase.taking;
+  _QuizPhase _phase = _QuizPhase.loading;
   _QuizResult? _result;
   bool _parseError = false;
+  // True when results came from a prior DB attempt (not the current session).
+  bool _isPriorAttempt = false;
 
   @override
   void initState() {
     super.initState();
     _parseQuestions();
+    _checkPriorAttempt();
   }
 
   void _parseQuestions() {
@@ -934,6 +938,67 @@ class _QuizTabState extends State<_QuizTab> {
     } catch (_) {
       _parseError = true;
     }
+  }
+
+  Future<void> _checkPriorAttempt() async {
+    final materialId = widget.materialId;
+    if (materialId == null) {
+      if (mounted) setState(() => _phase = _QuizPhase.taking);
+      return;
+    }
+
+    final supabase = Supabase.instance.client;
+    final userId = supabase.auth.currentUser?.id;
+    if (userId == null) {
+      if (mounted) setState(() => _phase = _QuizPhase.taking);
+      return;
+    }
+
+    try {
+      final data = await supabase
+          .from('quiz_attempts')
+          .select('score, answers_json')
+          .eq('student_id', userId)
+          .eq('material_id', materialId)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      if (data != null) {
+        _loadResultFromAttempt(data);
+      } else {
+        setState(() => _phase = _QuizPhase.taking);
+      }
+    } catch (_) {
+      // On network error let them proceed; DB will reject a duplicate at submit.
+      if (mounted) setState(() => _phase = _QuizPhase.taking);
+    }
+  }
+
+  void _loadResultFromAttempt(Map<String, dynamic> attempt) {
+    final score = attempt['score'] as int;
+    final rawAnswers = attempt['answers_json'] as Map<String, dynamic>;
+
+    final wrong = <_WrongAnswer>[];
+    for (int i = 0; i < _questions.length; i++) {
+      final q = _questions[i];
+      final ans = rawAnswers['$i'] as int?;
+      if (ans != null && ans != q.correct) {
+        wrong.add(_WrongAnswer(
+          index: i,
+          questionText: q.text,
+          selectedText: q.options[ans],
+          correctText: q.options[q.correct],
+          explanation: q.explanation,
+        ));
+      }
+    }
+
+    setState(() {
+      _result = _QuizResult(score: score, total: _questions.length, wrongAnswers: wrong);
+      _phase = _QuizPhase.done;
+      _isPriorAttempt = true;
+    });
   }
 
   int get _answeredCount => _selected.where((s) => s != null).length;
@@ -982,7 +1047,6 @@ class _QuizTabState extends State<_QuizTab> {
 
     setState(() => _phase = _QuizPhase.submitting);
 
-    // Push to Supabase
     String? submitError;
     if (widget.materialId == null) {
       submitError = 'material_id is null — quiz was not saved to the database.';
@@ -998,6 +1062,13 @@ class _QuizTabState extends State<_QuizTab> {
           'answers_json': answersJson,
           'score': score,
         });
+      } on PostgrestException catch (e) {
+        // 23505 = unique violation — already submitted (shouldn't normally happen)
+        if (e.code == '23505') {
+          submitError = null; // treat as success; score is already on server
+        } else {
+          submitError = e.message;
+        }
       } catch (e) {
         submitError = e.toString();
       }
@@ -1011,6 +1082,7 @@ class _QuizTabState extends State<_QuizTab> {
           wrongAnswers: wrong,
           submitError: submitError);
       _phase = _QuizPhase.done;
+      _isPriorAttempt = false;
     });
   }
 
@@ -1042,14 +1114,6 @@ class _QuizTabState extends State<_QuizTab> {
     });
   }
 
-  void _retake() {
-    setState(() {
-      _selected = List.filled(_questions.length, null);
-      _phase = _QuizPhase.taking;
-      _result = null;
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     if (widget.quizJson == null) {
@@ -1064,9 +1128,9 @@ class _QuizTabState extends State<_QuizTab> {
     }
 
     return switch (_phase) {
+      _QuizPhase.loading => const Center(child: CircularProgressIndicator()),
       _QuizPhase.taking => _buildForm(context),
-      _QuizPhase.submitting =>
-        const Center(child: CircularProgressIndicator()),
+      _QuizPhase.submitting => const Center(child: CircularProgressIndicator()),
       _QuizPhase.done => _buildResults(context),
     };
   }
@@ -1288,9 +1352,11 @@ class _QuizTabState extends State<_QuizTab> {
         // Submission status banner
         if (r.submitError == null)
           _statusTile(context,
-              icon: Icons.cloud_done_rounded,
+              icon: _isPriorAttempt ? Icons.lock_rounded : Icons.cloud_done_rounded,
               color: const Color(0xFF1971C2),
-              text: 'Results submitted to your teacher.')
+              text: _isPriorAttempt
+                  ? 'Already submitted — quiz can only be taken once.'
+                  : 'Results submitted to your teacher.')
         else ...[
           _statusTile(context,
               icon: Icons.cloud_off_rounded,
@@ -1386,14 +1452,6 @@ class _QuizTabState extends State<_QuizTab> {
               )),
         ],
 
-        const SizedBox(height: 24),
-        OutlinedButton.icon(
-          onPressed: _retake,
-          icon: const Icon(Icons.replay_rounded),
-          label: const Text('Retake Quiz'),
-          style:
-              OutlinedButton.styleFrom(minimumSize: const Size.fromHeight(48)),
-        ),
         const SizedBox(height: 16),
       ],
     );
