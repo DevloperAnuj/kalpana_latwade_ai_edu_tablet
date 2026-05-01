@@ -7,6 +7,8 @@ import 'package:eduforge_core/eduforge_core.dart';
 
 import '../../bloc/class/class_bloc.dart';
 import '../../bloc/class_selection/class_selection_cubit.dart';
+import '../../bloc/draft/draft_cubit.dart';
+import '../../bloc/generation/generation_bloc.dart';
 import '../../models/class_model.dart';
 
 class TeacherHomeScreen extends StatefulWidget {
@@ -57,37 +59,68 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
             ),
           ],
         ),
-        body: BlocBuilder<ClassBloc, ClassState>(
-          builder: (context, state) {
-            if (state is ClassInitial ||
-                state is ClassLoading ||
-                state is ClassOperationSuccess) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: Column(
+          children: [
+            // Draft resume banner
+            BlocBuilder<DraftCubit, DraftState>(
+              builder: (context, draft) {
+                if (draft.isEmpty) return const SizedBox.shrink();
+                return MaterialBanner(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 16, vertical: 8),
+                  leading: const Icon(Icons.edit_note),
+                  content: Text(
+                      'Unsaved draft: "${draft.topicTitle ?? 'Untitled'}"'),
+                  actions: [
+                    TextButton(
+                      onPressed: () =>
+                          context.read<DraftCubit>().clearDraft(),
+                      child: const Text('Discard'),
+                    ),
+                    FilledButton(
+                      onPressed: () => _resumeDraft(context, draft),
+                      child: const Text('Resume'),
+                    ),
+                  ],
+                );
+              },
+            ),
+            // Class list
+            Expanded(
+              child: BlocBuilder<ClassBloc, ClassState>(
+                builder: (context, state) {
+                  if (state is ClassInitial ||
+                      state is ClassLoading ||
+                      state is ClassOperationSuccess) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (state is ClassError) {
-              return _ErrorState(
-                message: state.message,
-                onRetry: () =>
-                    context.read<ClassBloc>().add(const FetchClasses()),
-              );
-            }
+                  if (state is ClassError) {
+                    return _ErrorState(
+                      message: state.message,
+                      onRetry: () =>
+                          context.read<ClassBloc>().add(const FetchClasses()),
+                    );
+                  }
 
-            if (state is ClassesLoaded) {
-              if (state.classes.isEmpty) return const _EmptyState();
+                  if (state is ClassesLoaded) {
+                    if (state.classes.isEmpty) return const _EmptyState();
 
-              return ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: state.classes.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: _ClassCard(cls: state.classes[index]),
-                ),
-              );
-            }
+                    return ListView.builder(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: state.classes.length,
+                      itemBuilder: (context, index) => Padding(
+                        padding: const EdgeInsets.only(bottom: 12),
+                        child: _ClassCard(cls: state.classes[index]),
+                      ),
+                    );
+                  }
 
-            return const SizedBox.shrink();
-          },
+                  return const SizedBox.shrink();
+                },
+              ),
+            ),
+          ],
         ),
         floatingActionButton: FloatingActionButton.extended(
           onPressed: () => _showCreateDialog(context),
@@ -96,6 +129,21 @@ class _TeacherHomeScreenState extends State<TeacherHomeScreen> {
         ),
       ),
     );
+  }
+
+  void _resumeDraft(BuildContext context, DraftState draft) {
+    final result = draft.generationResult;
+    if (result == null) {
+      context.read<DraftCubit>().clearDraft();
+      return;
+    }
+    context.read<GenerationBloc>().add(RestoreResult(
+          result: result,
+          topicTitle: draft.topicTitle!,
+          lessonContent: draft.lessonContent!,
+          classId: draft.classId!,
+        ));
+    context.push('/teacher/classes/${draft.classId}/topics/preview');
   }
 
   void _showCreateDialog(BuildContext ctx) {

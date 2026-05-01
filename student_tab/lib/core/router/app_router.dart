@@ -1,11 +1,15 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:eduforge_core/eduforge_core.dart';
 
-import '../../features/student/student_home_screen.dart';
+import '../../bloc/material_viewer/material_viewer_cubit.dart';
+import '../../features/student/join_class_screen.dart';
+import '../../features/student/material_viewer_screen.dart';
+import '../../features/student/student_topic_list_screen.dart';
 import '../../features/teacher/teacher_home_screen.dart';
 
 GoRouter createRouter(AuthBloc authBloc) {
@@ -22,6 +26,11 @@ GoRouter createRouter(AuthBloc authBloc) {
       }
 
       final location = state.uri.path;
+
+      // AuthScreen hardcodes these paths after login — remap both to /student/join
+      if (location == '/student/topics') return '/student/join';
+      if (location == '/teacher/classes') return '/student/join';
+
       final isAuthRoute = location == '/auth';
 
       if (authState is Unauthenticated || authState is AuthError) {
@@ -29,17 +38,8 @@ GoRouter createRouter(AuthBloc authBloc) {
       }
 
       if (authState is Authenticated) {
-        if (isAuthRoute) {
-          return authState.role == 'teacher'
-              ? '/teacher/classes'
-              : '/student/topics';
-        }
-        if (authState.role == 'teacher' && location.startsWith('/student')) {
-          return '/teacher/classes';
-        }
-        if (authState.role == 'student' && location.startsWith('/teacher')) {
-          return '/student/topics';
-        }
+        if (isAuthRoute) return '/student/join';
+        if (location.startsWith('/teacher')) return '/student/join';
       }
 
       return null;
@@ -54,8 +54,25 @@ GoRouter createRouter(AuthBloc authBloc) {
         builder: (context, state) => const TeacherHomeScreen(),
       ),
       GoRoute(
-        path: '/student/topics',
-        builder: (context, state) => const StudentHomeScreen(),
+        path: '/student/join',
+        builder: (context, state) => const JoinClassScreen(),
+      ),
+      GoRoute(
+        path: '/student/classes/:classId/topics',
+        builder: (context, state) => StudentTopicListScreen(
+          classId: state.pathParameters['classId']!,
+          className: state.extra as String? ?? 'Topics',
+        ),
+      ),
+      GoRoute(
+        path: '/student/material/:topicId',
+        builder: (context, state) => BlocProvider(
+          create: (_) => MaterialViewerCubit(),
+          child: MaterialViewerScreen(
+            topicId: state.pathParameters['topicId']!,
+            topicTitle: state.extra as String? ?? 'Topic',
+          ),
+        ),
       ),
     ],
   );

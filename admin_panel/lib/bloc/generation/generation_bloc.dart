@@ -26,6 +26,8 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
   String? _topicTitle;
   String? _lessonContent;
   String? _classId;
+  // Non-null when editing an existing published topic (used to skip insert on republish)
+  String? _topicId;
 
   // ── Helpers ─────────────────────────────────────────────────────────────
 
@@ -49,6 +51,7 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     _topicTitle = event.topicTitle;
     _lessonContent = event.lessonContent;
     _classId = event.classId;
+    _topicId = null; // new topic — clear any previously restored id
 
     // Steps: key(0.05) mindmap(0.2) flashcards(0.4) infographic(0.6) table(0.8) quiz(1.0)
     emit(const GenerationLoading(step: 'Fetching AI key…', progress: 0.02));
@@ -189,6 +192,7 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
         topicTitle: _topicTitle!,
         lessonContent: _lessonContent!,
         classId: _classId!,
+        topicId: _topicId,
         updatedType: event.materialType,
       ));
     } catch (e) {
@@ -211,24 +215,6 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     ));
 
     try {
-      final userId = _supabase.auth.currentUser!.id;
-
-      // Insert topic, get its id
-      final topicRow = await _supabase
-          .from('topics')
-          .insert({
-            'class_id': _classId!,
-            'teacher_id': userId,
-            'title': _topicTitle!,
-            'raw_content': _lessonContent!,
-            'status': 'published',
-          })
-          .select('id')
-          .single();
-
-      final topicId = topicRow['id'] as String;
-
-      // Upsert all five materials
       final r = event.result;
       final materials = {
         'mindmap': r.mindmap.toJson(),
@@ -237,6 +223,37 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
         'table': r.table.toJson(),
         'quiz': r.quiz.toJson(),
       };
+
+      late String topicId;
+
+      // Sync lesson content if the teacher edited it in the Content tab
+      if (event.lessonContent != null) {
+        _lessonContent = event.lessonContent;
+      }
+
+      if (_topicId != null) {
+        // Republish: update raw_content in case it was edited, then upsert materials
+        topicId = _topicId!;
+        await _supabase.from('topics').update({
+          'raw_content': _lessonContent!,
+        }).eq('id', topicId);
+      } else {
+        // New topic: insert row and capture its id
+        final userId = _supabase.auth.currentUser!.id;
+        final topicRow = await _supabase
+            .from('topics')
+            .insert({
+              'class_id': _classId!,
+              'teacher_id': userId,
+              'title': _topicTitle!,
+              'raw_content': _lessonContent!,
+              'status': 'published',
+            })
+            .select('id')
+            .single();
+        topicId = topicRow['id'] as String;
+        _topicId = topicId; // remember for any subsequent republish
+      }
 
       for (final entry in materials.entries) {
         await _supabase.from('materials').upsert(
@@ -273,11 +290,13 @@ class GenerationBloc extends Bloc<GenerationEvent, GenerationState> {
     _topicTitle = event.topicTitle;
     _lessonContent = event.lessonContent;
     _classId = event.classId;
+    _topicId = event.topicId;
     emit(GenerationSuccess(
       result: event.result,
       topicTitle: event.topicTitle,
       lessonContent: event.lessonContent,
       classId: event.classId,
+      topicId: event.topicId,
     ));
   }
 

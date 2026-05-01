@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import 'package:eduforge_core/eduforge_core.dart';
 
+import 'bloc/student/student_bloc.dart';
+
 class EduForgeApp extends StatelessWidget {
   final AuthBloc authBloc;
   final GoRouter router;
@@ -20,6 +22,7 @@ class EduForgeApp extends StatelessWidget {
       providers: [
         BlocProvider.value(value: authBloc),
         BlocProvider(create: (_) => ThemeCubit()),
+        BlocProvider(create: (_) => StudentBloc()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

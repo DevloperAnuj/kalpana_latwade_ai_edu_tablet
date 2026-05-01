@@ -5,11 +5,15 @@ import 'package:go_router/go_router.dart';
 
 import 'package:eduforge_core/eduforge_core.dart';
 
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../bloc/quiz_results/quiz_results_bloc.dart';
 import '../../features/student/student_home_screen.dart';
 import '../../features/teacher/class_roster_screen.dart';
 import '../../features/teacher/new_topic_screen.dart';
 import '../../features/teacher/preview_screen.dart';
 import '../../features/teacher/teacher_home_screen.dart';
+import '../../features/teacher/topic_results_screen.dart';
 import '../../features/teacher/topics_screen.dart';
 
 GoRouter createRouter(AuthBloc authBloc) {
@@ -86,6 +90,17 @@ GoRouter createRouter(AuthBloc authBloc) {
         path: '/teacher/classes/:classId/topics/preview',
         builder: (context, state) => PreviewScreen(
           classId: state.pathParameters['classId']!,
+        ),
+      ),
+      GoRoute(
+        path: '/teacher/classes/:classId/topics/:topicId/results',
+        builder: (context, state) => BlocProvider(
+          create: (_) => QuizResultsBloc(),
+          child: TopicResultsScreen(
+            classId: state.pathParameters['classId']!,
+            topicId: state.pathParameters['topicId']!,
+            topicTitle: state.extra as String? ?? 'Quiz Results',
+          ),
         ),
       ),
     ],

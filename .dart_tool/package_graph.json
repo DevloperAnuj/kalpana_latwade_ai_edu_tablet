@@ -42,6 +42,7 @@
       "dependencies": [
         "cupertino_icons",
         "eduforge_core",
+        "equatable",
         "flutter",
         "flutter_bloc",
         "go_router",

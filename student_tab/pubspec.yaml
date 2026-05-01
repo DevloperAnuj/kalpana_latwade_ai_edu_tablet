@@ -19,6 +19,7 @@ dependencies:
   hydrated_bloc: ^10.0.0
   path_provider: ^2.1.5
   go_router: ^15.0.0
+  equatable: ^2.0.5
 
 dev_dependencies:
   flutter_test:

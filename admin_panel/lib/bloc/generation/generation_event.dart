@@ -34,31 +34,36 @@ class RegenerateMaterial extends GenerationEvent {
 }
 
 /// Publish the (possibly edited) result to Supabase.
+/// [lessonContent] carries any edits made in the Content tab so the DB stays in sync.
 class PublishTopic extends GenerationEvent {
   final GenerationResult result;
+  final String? lessonContent;
 
-  const PublishTopic(this.result);
+  const PublishTopic(this.result, {this.lessonContent});
 
   @override
-  List<Object?> get props => [result];
+  List<Object?> get props => [result, lessonContent];
 }
 
-/// Restore a previously generated result (from draft) without calling the API.
+/// Restore a previously generated result (from draft or existing topic) without calling the API.
+/// [topicId] is non-null when opening an already-published topic (enables update instead of insert).
 class RestoreResult extends GenerationEvent {
   final GenerationResult result;
   final String topicTitle;
   final String lessonContent;
   final String classId;
+  final String? topicId;
 
   const RestoreResult({
     required this.result,
     required this.topicTitle,
     required this.lessonContent,
     required this.classId,
+    this.topicId,
   });
 
   @override
-  List<Object?> get props => [topicTitle, lessonContent, classId];
+  List<Object?> get props => [topicTitle, lessonContent, classId, topicId];
 }
 
 /// Reset bloc to initial state (called when entering NewTopicScreen).

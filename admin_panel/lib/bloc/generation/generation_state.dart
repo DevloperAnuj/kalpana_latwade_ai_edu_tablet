@@ -23,11 +23,13 @@ class GenerationLoading extends GenerationState {
 
 /// All five materials generated. [updatedType] is null on initial generation;
 /// set to the material type when only one material was re-generated.
+/// [topicId] is non-null when viewing/editing an already-published topic.
 class GenerationSuccess extends GenerationState {
   final GenerationResult result;
   final String topicTitle;
   final String lessonContent;
   final String classId;
+  final String? topicId;
   final String? updatedType;
 
   const GenerationSuccess({
@@ -35,11 +37,12 @@ class GenerationSuccess extends GenerationState {
     required this.topicTitle,
     required this.lessonContent,
     required this.classId,
+    this.topicId,
     this.updatedType,
   });
 
   @override
-  List<Object?> get props => [result, topicTitle, lessonContent, classId, updatedType];
+  List<Object?> get props => [result, topicTitle, lessonContent, classId, topicId, updatedType];
 }
 
 class GenerationFailure extends GenerationState {

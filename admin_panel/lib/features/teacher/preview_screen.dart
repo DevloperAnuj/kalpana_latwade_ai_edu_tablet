@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -22,6 +24,8 @@ class PreviewScreen extends StatefulWidget {
 class _PreviewScreenState extends State<PreviewScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late TextEditingController _contentCtrl;
+  Timer? _autoSaveTimer;
 
   // Local editable copies of each material type
   late Mindmap _mindmap;
@@ -31,25 +35,46 @@ class _PreviewScreenState extends State<PreviewScreen>
   late List<QuizQuestion> _quiz;
 
   late String _topicTitle;
+  late String _lessonContent;
+  // Non-null when editing an already-published topic (republish mode)
+  String? _topicId;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
+    _contentCtrl = TextEditingController();
 
     final state = context.read<GenerationBloc>().state;
     if (state is GenerationSuccess) {
       _initFromSuccess(state);
     }
+
+    // Auto-save every 10 s for new (unpublished) topics only
+    _autoSaveTimer = Timer.periodic(const Duration(seconds: 10), (_) {
+      if (_topicId == null && mounted) _autoSave();
+    });
   }
 
   void _initFromSuccess(GenerationSuccess s) {
     _topicTitle = s.topicTitle;
+    _lessonContent = s.lessonContent;
+    _topicId = s.topicId;
+    _contentCtrl.text = s.lessonContent;
     _mindmap = s.result.mindmap;
     _flashcards = List.from(s.result.flashcards);
     _infographic = s.result.infographic;
     _tableData = s.result.table;
     _quiz = List.from(s.result.quiz.questions);
+  }
+
+  void _autoSave() {
+    context.read<DraftCubit>().saveDraft(
+          topicTitle: _topicTitle,
+          lessonContent: _lessonContent,
+          classId: widget.classId,
+          result: _currentResult,
+        );
   }
 
   void _updateMaterial(String type, GenerationResult result) {
@@ -80,24 +105,29 @@ class _PreviewScreenState extends State<PreviewScreen>
   }
 
   void _publish() {
-    context.read<GenerationBloc>().add(PublishTopic(_currentResult));
+    context
+        .read<GenerationBloc>()
+        .add(PublishTopic(_currentResult, lessonContent: _lessonContent));
   }
 
   @override
   void dispose() {
+    _autoSaveTimer?.cancel();
+    _contentCtrl.dispose();
     _tabController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final isExistingTopic = _topicId != null;
+
     return BlocConsumer<GenerationBloc, GenerationState>(
       listener: (context, state) {
         if (state is GenerationSuccess) {
           if (state.updatedType != null) {
             _updateMaterial(state.updatedType!, state.result);
           } else {
-            // Full re-generation (shouldn't normally happen on preview screen)
             setState(() => _initFromSuccess(state));
           }
         } else if (state is GenerationFailure) {
@@ -111,7 +141,11 @@ class _PreviewScreenState extends State<PreviewScreen>
         } else if (state is PublishSuccess) {
           context.read<DraftCubit>().clearDraft();
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Topic published successfully!')),
+            SnackBar(
+              content: Text(isExistingTopic
+                  ? 'Topic updated successfully!'
+                  : 'Topic published successfully!'),
+            ),
           );
           Navigator.of(context).popUntil((route) => route.isFirst);
         } else if (state is PublishFailure) {
@@ -129,8 +163,8 @@ class _PreviewScreenState extends State<PreviewScreen>
             state is RegenerationLoading ? state.materialType : null;
         final isRegenerating = regeneratingType != null;
 
-        final tabLabels = ['Mindmap', 'Flashcards', 'Infographic', 'Table', 'Quiz'];
-        final materialKeys = ['mindmap', 'flashcards', 'infographic', 'table', 'quiz'];
+        final tabLabels = ['Mindmap', 'Flashcards', 'Infographic', 'Table', 'Quiz', 'Content'];
+        final materialKeys = ['mindmap', 'flashcards', 'infographic', 'table', 'quiz', 'content'];
 
         return Scaffold(
           appBar: AppBar(
@@ -172,8 +206,8 @@ class _PreviewScreenState extends State<PreviewScreen>
               else
                 FilledButton.icon(
                   onPressed: isRegenerating ? null : _publish,
-                  icon: const Icon(Icons.publish),
-                  label: const Text('Publish'),
+                  icon: Icon(isExistingTopic ? Icons.sync : Icons.publish),
+                  label: Text(isExistingTopic ? 'Update' : 'Publish'),
                 ),
               const SizedBox(width: 8),
             ],
@@ -181,15 +215,12 @@ class _PreviewScreenState extends State<PreviewScreen>
           body: TabBarView(
             controller: _tabController,
             children: [
-              // ── Mindmap ────────────────────────────────────────────────
               _TabShell(
                 materialType: 'mindmap',
                 regeneratingType: regeneratingType,
                 onRegenerate: () => _regenerate('mindmap'),
                 child: MindmapTab(mindmap: _mindmap),
               ),
-
-              // ── Flashcards ─────────────────────────────────────────────
               _TabShell(
                 materialType: 'flashcards',
                 regeneratingType: regeneratingType,
@@ -200,8 +231,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       setState(() => _flashcards = updated),
                 ),
               ),
-
-              // ── Infographic ────────────────────────────────────────────
               _TabShell(
                 materialType: 'infographic',
                 regeneratingType: regeneratingType,
@@ -212,8 +241,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       setState(() => _infographic = updated),
                 ),
               ),
-
-              // ── Table ──────────────────────────────────────────────────
               _TabShell(
                 materialType: 'table',
                 regeneratingType: regeneratingType,
@@ -224,8 +251,6 @@ class _PreviewScreenState extends State<PreviewScreen>
                       setState(() => _tableData = updated),
                 ),
               ),
-
-              // ── Quiz ───────────────────────────────────────────────────
               _TabShell(
                 materialType: 'quiz',
                 regeneratingType: regeneratingType,
@@ -233,6 +258,25 @@ class _PreviewScreenState extends State<PreviewScreen>
                 child: QuizTab(
                   questions: _quiz,
                   onChanged: (updated) => setState(() => _quiz = updated),
+                ),
+              ),
+
+              // ── Content ────────────────────────────────────────────────
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  controller: _contentCtrl,
+                  maxLines: null,
+                  expands: true,
+                  textAlignVertical: TextAlignVertical.top,
+                  decoration: const InputDecoration(
+                    hintText: 'Lesson content…',
+                    border: OutlineInputBorder(),
+                    alignLabelWithHint: true,
+                  ),
+                  style: const TextStyle(fontSize: 14, height: 1.6),
+                  onChanged: (text) =>
+                      setState(() => _lessonContent = text),
                 ),
               ),
             ],
@@ -243,7 +287,7 @@ class _PreviewScreenState extends State<PreviewScreen>
   }
 }
 
-// ── Tab wrapper that shows a Regenerate button at the top ────────────────────
+// ── Tab wrapper with Regenerate button ───────────────────────────────────────
 
 class _TabShell extends StatelessWidget {
   final String materialType;
@@ -278,8 +322,7 @@ class _TabShell extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.refresh, size: 16),
-                label: Text(
-                    'Regenerate ${_label(materialType)}'),
+                label: Text('Regenerate ${_label(materialType)}'),
               ),
             ],
           ),
