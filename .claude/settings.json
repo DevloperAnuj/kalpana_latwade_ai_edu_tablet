@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(fvm flutter *)"
+      "Bash(fvm flutter *)",
+      "Bash(flutter analyze *)"
     ]
   }
 }

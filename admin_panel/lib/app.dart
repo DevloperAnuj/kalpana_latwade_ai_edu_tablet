@@ -5,6 +5,10 @@ import 'package:go_router/go_router.dart';
 import 'package:eduforge_core/eduforge_core.dart';
 
 import 'bloc/ai_key/ai_key_bloc.dart';
+import 'bloc/class/class_bloc.dart';
+import 'bloc/class_selection/class_selection_cubit.dart';
+import 'bloc/draft/draft_cubit.dart';
+import 'bloc/generation/generation_bloc.dart';
 
 class EduForgeApp extends StatelessWidget {
   final AuthBloc authBloc;
@@ -23,6 +27,10 @@ class EduForgeApp extends StatelessWidget {
         BlocProvider.value(value: authBloc),
         BlocProvider(create: (_) => ThemeCubit()),
         BlocProvider(create: (_) => AiKeyBloc()),
+        BlocProvider(create: (_) => ClassBloc()),
+        BlocProvider(create: (_) => ClassSelectionCubit()),
+        BlocProvider(create: (_) => GenerationBloc()),
+        BlocProvider(create: (_) => DraftCubit()),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

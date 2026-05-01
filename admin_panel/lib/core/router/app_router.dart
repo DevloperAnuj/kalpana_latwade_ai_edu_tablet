@@ -6,7 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:eduforge_core/eduforge_core.dart';
 
 import '../../features/student/student_home_screen.dart';
+import '../../features/teacher/class_roster_screen.dart';
+import '../../features/teacher/new_topic_screen.dart';
+import '../../features/teacher/preview_screen.dart';
 import '../../features/teacher/teacher_home_screen.dart';
+import '../../features/teacher/topics_screen.dart';
 
 GoRouter createRouter(AuthBloc authBloc) {
   final notifier = _RouterNotifier(authBloc);
@@ -54,8 +58,35 @@ GoRouter createRouter(AuthBloc authBloc) {
         builder: (context, state) => const TeacherHomeScreen(),
       ),
       GoRoute(
+        path: '/teacher/classes/:classId/roster',
+        builder: (context, state) => ClassRosterScreen(
+          classId: state.pathParameters['classId']!,
+          className: state.extra as String? ?? 'Class Roster',
+        ),
+      ),
+      GoRoute(
         path: '/student/topics',
         builder: (context, state) => const StudentHomeScreen(),
+      ),
+      GoRoute(
+        path: '/teacher/classes/:classId/topics',
+        builder: (context, state) => TopicsScreen(
+          classId: state.pathParameters['classId']!,
+          className: state.extra as String? ?? 'Topics',
+        ),
+      ),
+      GoRoute(
+        path: '/teacher/classes/:classId/new-topic',
+        builder: (context, state) => NewTopicScreen(
+          classId: state.pathParameters['classId']!,
+          className: state.extra as String? ?? 'Class',
+        ),
+      ),
+      GoRoute(
+        path: '/teacher/classes/:classId/topics/preview',
+        builder: (context, state) => PreviewScreen(
+          classId: state.pathParameters['classId']!,
+        ),
       ),
     ],
   );
