@@ -3,6 +3,7 @@ name: kalpana_ai_edu_tablet
 packages:
   - admin_panel
   - student_tab
+  - eduforge_core
 
 
 scripts:

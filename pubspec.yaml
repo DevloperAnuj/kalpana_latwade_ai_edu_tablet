@@ -8,6 +8,7 @@ environment:
 workspace:
   - admin_panel
   - student_tab
+  - eduforge_core
 
 dev_dependencies:
   melos: ^7.5.1
