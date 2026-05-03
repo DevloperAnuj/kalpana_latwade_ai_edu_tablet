@@ -1,0 +1,27 @@
+# Ignore everything at root except the tracked folders
+README.md
+melos.yaml
+melos_kalpana_ai_edu_tablet_workspace.iml
+pubspec.yaml
+pubspec.lock
+build/
+
+# Common generated/dependency folders
+**/node_modules/
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache/
+**/.pub/
+**/build/
+**/.gradle/
+**/.idea/
+**/.vscode/
+**/*.g.dart
+**/*.freezed.dart
+**/*.mocks.dart
+
+# OS files
+**/.DS_Store
+**/Thumbs.db

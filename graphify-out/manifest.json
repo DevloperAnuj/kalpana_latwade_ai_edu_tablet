@@ -1,0 +1,698 @@
+{
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\app.dart": {
+    "mtime": 1777642197.04604,
+    "hash": "10bdc33d8cab2a3ceb23ea2a5a6a74bc"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\main.dart": {
+    "mtime": 1777616905.7657216,
+    "hash": "4411bb329d16bf994654a55ef3f1bfa3"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\ai_key\\ai_key_bloc.dart": {
+    "mtime": 1777639751.949016,
+    "hash": "bf9c8c090e27def69e2f70c8657b712a"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\ai_key\\ai_key_event.dart": {
+    "mtime": 1777639734.971394,
+    "hash": "5c15dae3add6a787dfa176a67b716a05"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\ai_key\\ai_key_state.dart": {
+    "mtime": 1777639741.6596797,
+    "hash": "72e3696c3c2a1735fb57d3b68a95b8ed"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\class\\class_bloc.dart": {
+    "mtime": 1777639571.003387,
+    "hash": "a942310188306a3b5c2adde3112c09ed"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\class\\class_event.dart": {
+    "mtime": 1777620625.1105828,
+    "hash": "5a3fcbb2ef449300b5c78f8053d7de21"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\class\\class_state.dart": {
+    "mtime": 1777620627.3000333,
+    "hash": "7f3957427fe01b3d70dd7a66910bbcb4"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\class_selection\\class_selection_cubit.dart": {
+    "mtime": 1777620619.8062139,
+    "hash": "02ace563aa9440e384df09e1b6b5a4dc"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\draft\\draft_cubit.dart": {
+    "mtime": 1777622340.4924393,
+    "hash": "86d3a188195a173f2005495b9ed073fc"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\generation\\generation_bloc.dart": {
+    "mtime": 1777639846.4866538,
+    "hash": "156e8b5a406f8a4227bfdd2abffbca40"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\generation\\generation_event.dart": {
+    "mtime": 1777628571.638183,
+    "hash": "108afc442fc0b95971b517027cc4f590"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\generation\\generation_state.dart": {
+    "mtime": 1777627500.8417664,
+    "hash": "c2ba7dab16c6c7776f64fd5fe4e59232"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\quiz_results\\quiz_results_bloc.dart": {
+    "mtime": 1777642298.776371,
+    "hash": "3934fd94672ef1260b857b65846121e7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\quiz_results\\quiz_results_event.dart": {
+    "mtime": 1777639880.7299151,
+    "hash": "e395325802158165503ecb4206341c03"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\bloc\\quiz_results\\quiz_results_state.dart": {
+    "mtime": 1777642278.4964888,
+    "hash": "a5fea79ca345fb9d5237caced1f99c5b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\core\\router\\app_router.dart": {
+    "mtime": 1777642204.2991261,
+    "hash": "a06b6606f3a555f9f6043431011ed706"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\data\\repositories\\class_repository.dart": {
+    "mtime": 1777639473.612028,
+    "hash": "af084b0d0f9a0c5e091c126550f96d34"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\data\\repositories\\material_repository.dart": {
+    "mtime": 1777639484.1803367,
+    "hash": "d9d5a7e95a9d0526fe3a09b04564fb73"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\data\\repositories\\quiz_repository.dart": {
+    "mtime": 1777642255.1515465,
+    "hash": "09c1af8b2df2823d1abc741af606cb5b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\data\\repositories\\topic_repository.dart": {
+    "mtime": 1777639498.4040802,
+    "hash": "8ba25ac52d52b53c421e040b62473513"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\student\\student_home_screen.dart": {
+    "mtime": 1777567436.842847,
+    "hash": "e9cbd47cf6bf59aa4aaada11c15f79b3"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\class_roster_screen.dart": {
+    "mtime": 1777620687.9060462,
+    "hash": "74fee9a0c0c15ca8769d83d4e00f22d2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\new_topic_screen.dart": {
+    "mtime": 1777622690.2303147,
+    "hash": "fd056e7a02981164b015f122363c9e3f"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\preview_screen.dart": {
+    "mtime": 1777640868.3249817,
+    "hash": "e8fc56c9529b33e31ab968b3c49f02d3"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\teacher_home_screen.dart": {
+    "mtime": 1777642230.5913534,
+    "hash": "0ce153dfc9389dd4f6b79062b8043a18"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\topics_screen.dart": {
+    "mtime": 1777640810.5692577,
+    "hash": "405271d480c8f5ada10da2d5096605c9"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\topic_results_screen.dart": {
+    "mtime": 1777642304.4556644,
+    "hash": "e628249685f1f8748caaaa56458de22f"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\widgets\\flashcards_tab.dart": {
+    "mtime": 1777622381.067814,
+    "hash": "4618339bd723fb51cad2a7a68e23de30"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\widgets\\infographic_tab.dart": {
+    "mtime": 1777622401.435582,
+    "hash": "ff4d9c0667eed7e62a9bf4d6921cdc18"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\widgets\\mindmap_tab.dart": {
+    "mtime": 1777646012.053191,
+    "hash": "8a016aea6c3e41bc0f814afbd545122d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\widgets\\quiz_tab.dart": {
+    "mtime": 1777622460.216907,
+    "hash": "103c30bb61451ef7ecb8f06564da676e"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\features\\teacher\\widgets\\table_tab.dart": {
+    "mtime": 1777622417.2494514,
+    "hash": "404e150e6b0d45ab19c0e70c9baa8182"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\models\\class_model.dart": {
+    "mtime": 1777620616.1401808,
+    "hash": "22020b8b19d7bb53562102317de3ea92"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\models\\generation_result.dart": {
+    "mtime": 1777622204.4452026,
+    "hash": "4bec5588d2fd80a7a43dcbff90caabc9"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\models\\student_model.dart": {
+    "mtime": 1777642312.6994727,
+    "hash": "ba492cb525989789b566d4dafe5a0bd0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\lib\\services\\ai_service.dart": {
+    "mtime": 1777639835.3766193,
+    "hash": "a5b53eedc225d2c2f3704a7740246ec0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\test\\widget_test.dart": {
+    "mtime": 1777567077.7979844,
+    "hash": "4fb0669b48f28878c5883bfecc84b720"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\generated_plugin_registrant.cc": {
+    "mtime": 1777566942.9222898,
+    "hash": "8f827c92146e46fc11f4e794a498348b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\generated_plugin_registrant.h": {
+    "mtime": 1777464412.3593483,
+    "hash": "0ea33875f9f8e118f9c2ded03e2e2835"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\flutter_export.h": {
+    "mtime": 1777614269.8110864,
+    "hash": "51d6ddd086e800d34c1d143004c474fd"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\flutter_messenger.h": {
+    "mtime": 1777614269.8120842,
+    "hash": "9c15531692496dbfcb820431343d92fa"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\flutter_plugin_registrar.h": {
+    "mtime": 1777614269.8131084,
+    "hash": "205b172dd4be89df08a835c5afcd2c1a"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\flutter_texture_registrar.h": {
+    "mtime": 1777614269.8131084,
+    "hash": "4ffbfcf8b88a9690e82543b1761e81d5"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\flutter_windows.h": {
+    "mtime": 1777614269.8110864,
+    "hash": "68c93d1fb6ddeb8791194bed4b5b33a7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\binary_messenger_impl.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "286e55d651260380486c1ca7a2c44578"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\byte_buffer_streams.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "0a33501e8af56a1390ab6f75e0f568d9"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\core_implementations.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "91cfe8e97858850acdbc8891453ce5bc"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\engine_method_result.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "6172a3effcf1f354d756ff757377a576"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\flutter_engine.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "14c8cef2644702b8be3330109e5756a6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\flutter_view_controller.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "3c4959653a59ba03164e211059dc2652"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\plugin_registrar.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "3190b92da7033c643bf749e7f4266da8"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\standard_codec.cc": {
+    "mtime": 1777614271.6971965,
+    "hash": "035f8af9a9a084e129ceef3fa0396c47"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\texture_registrar_impl.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "7ec35caedbfe35b37bd7aa66dab7219b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\basic_message_channel.h": {
+    "mtime": 1777614271.7017097,
+    "hash": "45dd070af12cc7ab125d6ead5267f36c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\binary_messenger.h": {
+    "mtime": 1777614271.7017097,
+    "hash": "33562e00fd62a55bd23deeecf3a69a51"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\byte_streams.h": {
+    "mtime": 1777614271.7027228,
+    "hash": "00010cc0042e98ea973f4037a29a3ca0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\dart_project.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "21a40fe4d1f98493dd01865fc200d152"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\encodable_value.h": {
+    "mtime": 1777614271.703226,
+    "hash": "04dce67f4b05424f416ea05234e988c5"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\engine_method_result.h": {
+    "mtime": 1777614271.703226,
+    "hash": "55b4be5728dfb16220b1bda5bdace3fe"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\event_channel.h": {
+    "mtime": 1777614271.703226,
+    "hash": "143cf6f0acaa229d950d084c940cc77c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\event_sink.h": {
+    "mtime": 1777614271.703226,
+    "hash": "b1b98c1cf40abd6a3c308182c4822476"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\event_stream_handler.h": {
+    "mtime": 1777614271.703226,
+    "hash": "62be5ae665a6b931d6dc9ac4b27d6c93"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\event_stream_handler_functions.h": {
+    "mtime": 1777614271.703226,
+    "hash": "248c4e48231edda0bc7ac80722f15b53"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\flutter_engine.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "2b2405abfa2cc54351b6ee6ad02585c0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\flutter_view.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "33a6baf4984ec4c299c0b05cef6968ed"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\flutter_view_controller.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "815f4a5fbad9381269e2c216507285cd"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\message_codec.h": {
+    "mtime": 1777614271.703226,
+    "hash": "b5013c9553dc459d5f91b8ec2bda3d0a"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\method_call.h": {
+    "mtime": 1777614271.703226,
+    "hash": "a47afe801378afeffda4439e8cdb01ca"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\method_channel.h": {
+    "mtime": 1777614271.703226,
+    "hash": "beeb4b0780233e226f899bddd220b682"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\method_codec.h": {
+    "mtime": 1777614271.7142742,
+    "hash": "1d712b93e2dd2e28cb67a55a8d484694"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\method_result.h": {
+    "mtime": 1777614271.7157896,
+    "hash": "e48c7b84b470630e810b6a0bc2d8e542"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\method_result_functions.h": {
+    "mtime": 1777614271.7157896,
+    "hash": "6bfbb61c519f63386a0fb55608dbea90"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\plugin_registrar.h": {
+    "mtime": 1777614271.7168038,
+    "hash": "2b81addd18be801eda539f1de332ce4e"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\plugin_registrar_windows.h": {
+    "mtime": 1777614271.734055,
+    "hash": "0bbbe470228d787a92d567a95faa2b33"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\plugin_registry.h": {
+    "mtime": 1777614271.7225099,
+    "hash": "85c5071ca77f8687102dcae4f282388b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\standard_codec_serializer.h": {
+    "mtime": 1777614271.7225099,
+    "hash": "09399c3c509a601a970f6efd340a2529"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\standard_message_codec.h": {
+    "mtime": 1777614271.7225099,
+    "hash": "81df344828c7c48155ae22824eb61e50"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\standard_method_codec.h": {
+    "mtime": 1777614271.7225099,
+    "hash": "4707587e759b2b655852fc0e989c9e70"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\ephemeral\\cpp_client_wrapper\\include\\flutter\\texture_registrar.h": {
+    "mtime": 1777614271.7255218,
+    "hash": "ee739ab16ee0e2964edc9275a0379095"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\flutter_window.cpp": {
+    "mtime": 1745081693.0769804,
+    "hash": "2f463f9b7da67a2d692a012f9ea85e0c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\flutter_window.h": {
+    "mtime": 1745081693.0769804,
+    "hash": "7defcc89d4a26d56e801241d624d48fb"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\main.cpp": {
+    "mtime": 1777643939.9401603,
+    "hash": "eaba585c428821b449c0cb20d6fd3d6b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\resource.h": {
+    "mtime": 1745081693.0769804,
+    "hash": "1ade5dd15e613479a15e8832ed276f2b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\utils.cpp": {
+    "mtime": 1745081693.0769804,
+    "hash": "432461b09d862a2f8dadf380ff0e34e5"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\utils.h": {
+    "mtime": 1745081693.0769804,
+    "hash": "fd81e143f5614eb6fd75efe539002853"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\win32_window.cpp": {
+    "mtime": 1745081693.0769804,
+    "hash": "571eb8234dbc2661be03aa5f2a4d2fca"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\win32_window.h": {
+    "mtime": 1745081693.0769804,
+    "hash": "7569387d58711ab975940f4df3b4bcda"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\eduforge_core.dart": {
+    "mtime": 1777642134.2665188,
+    "hash": "b587f62084c103f864af8388e89e87cb"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\auth\\auth_bloc.dart": {
+    "mtime": 1777642149.9568703,
+    "hash": "0163ddcc473e2c02c57e81367e30db00"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\auth\\auth_event.dart": {
+    "mtime": 1777642140.8151424,
+    "hash": "1b040e303a6746100c320f60c08dac3c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\auth\\auth_state.dart": {
+    "mtime": 1777567372.1426451,
+    "hash": "88048e7b1d5b4d981e88b1802d9725d6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\profile\\profile_bloc.dart": {
+    "mtime": 1777642048.4800048,
+    "hash": "91e7d389a5aeb4e64249eb6ddc68f3e6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\profile\\profile_event.dart": {
+    "mtime": 1777642037.219584,
+    "hash": "692d6e3644d3f06dd6edc7916efd0750"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\bloc\\profile\\profile_state.dart": {
+    "mtime": 1777642041.1585534,
+    "hash": "617cd50c11ac8b3c808c97d5595b699a"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\config\\app_config.dart": {
+    "mtime": 1777639401.0847921,
+    "hash": "bfd798a864a1c48fa02c9f9e7f3f1ef4"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\constants\\supabase_constants.dart": {
+    "mtime": 1777612061.0694852,
+    "hash": "aef1364f1f6ba416f04a5786859c033c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\error\\app_exception.dart": {
+    "mtime": 1777639369.1552167,
+    "hash": "e7dbd8308fa46720e0c7dd2bbf6b8cfa"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\error\\error_logger.dart": {
+    "mtime": 1777639381.128847,
+    "hash": "e6246afaff7c0e8efa2373b6aff69a97"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\network\\retry_policy.dart": {
+    "mtime": 1777639411.422193,
+    "hash": "bd26ec6b4c8799c20f4952e1521ad8c4"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\observer\\app_bloc_observer.dart": {
+    "mtime": 1777616889.7001624,
+    "hash": "ef46bb1a39375b689afc55e677ce05f4"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\ui\\responsive_layout.dart": {
+    "mtime": 1777639960.2658389,
+    "hash": "d7736b72690f2a252426206b114a5a35"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\core\\utils\\input_sanitiser.dart": {
+    "mtime": 1777639813.3569672,
+    "hash": "db5116d0ac97dd924e652929e7c4ad5a"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\cubit\\theme\\theme_cubit.dart": {
+    "mtime": 1777567385.1350482,
+    "hash": "e0e07f580160fd1f51cf7ed4b9967f43"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\data\\repositories\\profile_repository.dart": {
+    "mtime": 1777642023.8904126,
+    "hash": "eacdac89d655716ccdc400ce519d638c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\features\\auth\\auth_screen.dart": {
+    "mtime": 1777642175.1363313,
+    "hash": "d77565ea036c67aef12c0790e369bfb7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\lib\\features\\profile\\profile_screen.dart": {
+    "mtime": 1777644695.6231897,
+    "hash": "2a3e7fd86b1faa4e99c2f52adce0d86d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\build.gradle.kts": {
+    "mtime": 1777464438.645194,
+    "hash": "803fe22651fbe96ed401eb0b66a492d1"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\gradlew": {
+    "mtime": 1777464439.0304863,
+    "hash": "7f1cd7eb3f75a1dc85cd37753972a6e2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\settings.gradle.kts": {
+    "mtime": 1777464438.9496434,
+    "hash": "f276a44edd917afd836899357fdae60e"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\build.gradle.kts": {
+    "mtime": 1777643974.7400885,
+    "hash": "a59742ddfeccb725da32b6580b3aaa51"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\java\\io\\flutter\\plugins\\GeneratedPluginRegistrant.java": {
+    "mtime": 1777566943.1665173,
+    "hash": "529605f42e93c3e507a2f0677d2f07af"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\kotlin\\inc\\imalpha\\eduforge\\MainActivity.kt": {
+    "mtime": 1777643980.7721612,
+    "hash": "28f7f58d9daf3a10aa9583783bad0825"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\app.dart": {
+    "mtime": 1777642327.934652,
+    "hash": "1e2ec369aefc9eaff81a4426bfe15ef7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\main.dart": {
+    "mtime": 1777785850.8973587,
+    "hash": "4ae8bc55ff99dcf21c34f273e780fdc0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\bloc\\material_viewer\\material_viewer_cubit.dart": {
+    "mtime": 1777639594.329015,
+    "hash": "7faa69af85ba64a9646c31765907f69d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\bloc\\student\\student_bloc.dart": {
+    "mtime": 1777639580.8504066,
+    "hash": "4a9e34c781f90eadc0008880da89ec1d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\bloc\\student\\student_event.dart": {
+    "mtime": 1777630730.3397942,
+    "hash": "6c5bed3addebccd38a82cc74d8291b90"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\bloc\\student\\student_state.dart": {
+    "mtime": 1777630737.9375846,
+    "hash": "2cfcafb96dd205402b32a0aa3c4c62c6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\core\\router\\app_router.dart": {
+    "mtime": 1777642334.6654236,
+    "hash": "1ad47787a844d2c86eedc373b5a9ba7c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\data\\repositories\\class_repository.dart": {
+    "mtime": 1777639520.6018372,
+    "hash": "6c7e46dbfd1a0cea2d3b3943e7a7dc86"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\data\\repositories\\material_repository.dart": {
+    "mtime": 1777639530.490351,
+    "hash": "4aceae1cd233c2f722c1eed31abf4063"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\data\\repositories\\quiz_repository.dart": {
+    "mtime": 1777639539.2020843,
+    "hash": "21540e972c96db1729cb3fade587631c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\student\\join_class_screen.dart": {
+    "mtime": 1777786231.9395926,
+    "hash": "39f04feb52ee645f94a9869e7f69bcae"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\student\\material_placeholder_screen.dart": {
+    "mtime": 1777630792.2509189,
+    "hash": "fb751a9aff9c8855a3095a17263a2782"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\student\\material_viewer_screen.dart": {
+    "mtime": 1777644775.8326423,
+    "hash": "b482ea0b6cd0fe932bbee1635227007f"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\student\\student_home_screen.dart": {
+    "mtime": 1777567488.6010814,
+    "hash": "e9cbd47cf6bf59aa4aaada11c15f79b3"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\student\\student_topic_list_screen.dart": {
+    "mtime": 1777640025.237582,
+    "hash": "80fbfe73189972cd2a78214df46e0a5e"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\features\\teacher\\teacher_home_screen.dart": {
+    "mtime": 1777567487.4017022,
+    "hash": "aec2d0e523cbc37125d5458558feddb0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\lib\\models\\study_materials.dart": {
+    "mtime": 1777636544.5199327,
+    "hash": "5016e2f0d1cd0cca155a1600f102235b"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\test\\widget_test.dart": {
+    "mtime": 1777567078.8231313,
+    "hash": "4fb0669b48f28878c5883bfecc84b720"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\001_initial_schema.sql": {
+    "mtime": 1777614904.25447,
+    "hash": "b7b3f61b4c13438fef9cd2f4e8d6c92d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\002_phase2_hardening.sql": {
+    "mtime": 1777618103.9253511,
+    "hash": "192662949555f3f092d441376a2166a8"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\003_fix_trigger_role.sql": {
+    "mtime": 1777619625.0102463,
+    "hash": "b83c68927895d3492b87502cb17c6024"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\004_fix_rls_recursion.sql": {
+    "mtime": 1777621002.7325265,
+    "hash": "c0669a08d54f3dba83469480c7b46ddd"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\005_topics_and_materials.sql": {
+    "mtime": 1777622851.1659372,
+    "hash": "535ad33b67b306fe55433e5eb0f90665"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\006_get_gemini_key_rpc.sql": {
+    "mtime": 1777623361.7566075,
+    "hash": "deaf9dbdffe284dd502620f2ec37d1ea"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\007_recreate_quiz_attempts.sql": {
+    "mtime": 1777629360.6602921,
+    "hash": "96077698b51b69745d6c5d59cc0967d2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\008_student_join_rpc.sql": {
+    "mtime": 1777630724.258266,
+    "hash": "37b4627e7a1ec30861e5075d88356a5f"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\009_quiz_attempts.sql": {
+    "mtime": 1777637094.603564,
+    "hash": "609b342a6c13541e31c1e0ad14d237a6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\010_rls_audit.sql": {
+    "mtime": 1777641201.976764,
+    "hash": "d06a31e363e864cdcea08def4d46d259"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\011_rate_limiting.sql": {
+    "mtime": 1777639671.875198,
+    "hash": "e48cef32e427f0347028646c504715b0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\012_soft_delete_and_indexes.sql": {
+    "mtime": 1777639685.469542,
+    "hash": "daa98802d3f4e6135c6163a35d5cac70"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\013_publish_topic_rpc.sql": {
+    "mtime": 1777639695.3694122,
+    "hash": "50048d73bd08ef51f997644dff67bdd2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\014_profile_roll_number.sql": {
+    "mtime": 1777642002.358647,
+    "hash": "a2e25f0a53a18896555f59166d2db7ce"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\supabase\\migrations\\015_one_attempt_per_quiz.sql": {
+    "mtime": 1777644689.9534578,
+    "hash": "a7e6352360e863d60cb3562877d070de"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\analysis_options.yaml": {
+    "mtime": 1777640053.2585127,
+    "hash": "c08af2753e699562d6c9737705d682e7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\CMakeLists.txt": {
+    "mtime": 1777643092.3126416,
+    "hash": "e55e942325d694d68bc450280810544c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\flutter\\CMakeLists.txt": {
+    "mtime": 1745081693.0769804,
+    "hash": "bbf66fed5180bd9ae8198b8d7c4a0001"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\admin_panel\\windows\\runner\\CMakeLists.txt": {
+    "mtime": 1745081693.0769804,
+    "hash": "028602ab9754bffe716659ada7590d29"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\analysis_options.yaml": {
+    "mtime": 1777640074.763469,
+    "hash": "c08af2753e699562d6c9737705d682e7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\analysis_options.yaml": {
+    "mtime": 1777640065.5648928,
+    "hash": "c08af2753e699562d6c9737705d682e7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\index.html": {
+    "mtime": 1777785878.261358,
+    "hash": "c105181174ab171cc14aafe0621c28ad"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\eduforge_core\\assets\\logo.jpg": {
+    "mtime": 1777641928.834024,
+    "hash": "4788173e6d24a0ab28494c532e556400"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\drawable-hdpi\\ic_launcher_foreground.png": {
+    "mtime": 1777785869.944718,
+    "hash": "e6f7cb916ec64bf925605f6a52104d49"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\drawable-mdpi\\ic_launcher_foreground.png": {
+    "mtime": 1777785869.944718,
+    "hash": "0401522d8432181cac03abf0b1f331b7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\drawable-xhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1777785869.944718,
+    "hash": "b072fc101a12ab3e33a75936593d2757"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\drawable-xxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1777785869.944718,
+    "hash": "c3f1ba67e9e3b785a85ebe4185dd5ac0"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\drawable-xxxhdpi\\ic_launcher_foreground.png": {
+    "mtime": 1777785869.944718,
+    "hash": "1eb96b6a11c925aca3b5437c552a9c9f"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-hdpi\\ic_launcher.png": {
+    "mtime": 1745081693.045738,
+    "hash": "13e9c72ec37fac220397aa819fa1ef2d"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-hdpi\\launcher_icon.png": {
+    "mtime": 1777785869.944718,
+    "hash": "8bb412f138185855ef266c35cc435b48"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-mdpi\\ic_launcher.png": {
+    "mtime": 1745081693.045738,
+    "hash": "6270344430679711b81476e29878caa7"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-mdpi\\launcher_icon.png": {
+    "mtime": 1777785869.944718,
+    "hash": "091fe3c5c0b4334e31dbbecd70de0334"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xhdpi\\ic_launcher.png": {
+    "mtime": 1745081693.045738,
+    "hash": "a0a8db5985280b3679d99a820ae2db79"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xhdpi\\launcher_icon.png": {
+    "mtime": 1777785869.944718,
+    "hash": "310e93832ea3f561b9cbef5992757522"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\ic_launcher.png": {
+    "mtime": 1745081693.045738,
+    "hash": "afe1b655b9f32da22f9a4301bb8e6ba8"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xxhdpi\\launcher_icon.png": {
+    "mtime": 1777785869.944718,
+    "hash": "fb22bc623d0fe03d880b87cf1a26ed74"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\ic_launcher.png": {
+    "mtime": 1745081693.045738,
+    "hash": "57838d52c318faff743130c3fcfae0c6"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\android\\app\\src\\main\\res\\mipmap-xxxhdpi\\launcher_icon.png": {
+    "mtime": 1777785869.944718,
+    "hash": "0b23afa967a7bf2497a3aa4ed128b3c2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\favicon.png": {
+    "mtime": 1777785869.9788823,
+    "hash": "1e1f0f8d23f5a92875a07dc16c8ec56c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\icons\\Icon-192.png": {
+    "mtime": 1777785869.9930017,
+    "hash": "0b23afa967a7bf2497a3aa4ed128b3c2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\icons\\Icon-512.png": {
+    "mtime": 1777785870.0250764,
+    "hash": "bb54ecc7b9a6bb3f50385d7fe752787c"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\icons\\Icon-maskable-192.png": {
+    "mtime": 1777785870.037354,
+    "hash": "0b23afa967a7bf2497a3aa4ed128b3c2"
+  },
+  "E:\\Windows Software\\Tesarract\\kalpana_latawade-ai-edu-tablet\\student_tab\\web\\icons\\Icon-maskable-512.png": {
+    "mtime": 1777785870.0702443,
+    "hash": "bb54ecc7b9a6bb3f50385d7fe752787c"
+  }
+}
