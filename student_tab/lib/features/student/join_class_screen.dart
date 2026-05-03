@@ -60,7 +60,6 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
             ? state.classes
             : <Map<String, dynamic>>[];
         final isLoading = state is StudentLoading;
-        final hasClasses = classes.isNotEmpty;
 
         return Scaffold(
           appBar: AppBar(
@@ -94,13 +93,11 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
             ],
           ),
           body: _buildBody(context, classes, isLoading),
-          floatingActionButton: hasClasses
-              ? null
-              : FloatingActionButton.extended(
-                  onPressed: _showJoinDialog,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Join Class'),
-                ),
+          floatingActionButton: FloatingActionButton.extended(
+            onPressed: _showJoinDialog,
+            icon: const Icon(Icons.add),
+            label: const Text('Join Class'),
+          ),
         );
       },
     );
