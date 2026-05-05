@@ -8,6 +8,7 @@ import 'package:eduforge_core/eduforge_core.dart';
 
 import 'app.dart';
 import 'core/router/app_router.dart';
+import 'data/local/notes_local_database.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,9 +26,11 @@ void main() async {
     anonKey: SupabaseConstants.anonKey,
   );
 
+  await NotesLocalDatabase.init();
+
   Bloc.observer = AppBlocObserver();
 
-  final authBloc = AuthBloc()..add(AuthCheckStatus());
+  final authBloc = AuthBloc()..add(const AuthCheckStatus());
   final router = createRouter(authBloc);
 
   runApp(EduForgeApp(authBloc: authBloc, router: router));

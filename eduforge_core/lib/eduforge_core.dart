@@ -1,6 +1,7 @@
 export 'bloc/auth/auth_bloc.dart';
 export 'bloc/profile/profile_bloc.dart';
 export 'core/config/app_config.dart';
+export 'core/constants/ai_constants.dart';
 export 'core/constants/supabase_constants.dart';
 export 'core/error/app_exception.dart';
 export 'core/error/error_logger.dart';

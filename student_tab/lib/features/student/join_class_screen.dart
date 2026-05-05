@@ -69,7 +69,9 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
                     ? authState.displayName
                     : null;
                 return Text(
-                  name != null && name.isNotEmpty ? 'Hello, $name' : 'EduForge',
+                  name != null && name.isNotEmpty
+                      ? 'Hello, $name'
+                      : 'EduForge',
                 );
               },
             ),
@@ -108,41 +110,130 @@ class _JoinClassScreenState extends State<JoinClassScreen> {
     List<Map<String, dynamic>> classes,
     bool isLoading,
   ) {
-    if (isLoading && classes.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
 
-    if (classes.isEmpty) {
-      return _EmptyClassList(onJoin: _showJoinDialog);
-    }
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(16, 20, 16, 88),
+      children: [
+        // ── Notes hero card ────────────────────────────────────────────────
+        _NotesHeroCard(),
+        const SizedBox(height: 28),
 
-    return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: classes.length,
-      separatorBuilder: (_, _) => const SizedBox(height: 8),
-      itemBuilder: (context, index) {
-        final cls = classes[index];
-        return Card(
-          child: ListTile(
-            leading: CircleAvatar(
-              backgroundColor:
-                  Theme.of(context).colorScheme.primaryContainer,
-              child: Icon(
-                Icons.school_outlined,
-                color: Theme.of(context).colorScheme.onPrimaryContainer,
+        // ── Classes section ────────────────────────────────────────────────
+        Row(
+          children: [
+            Icon(Icons.school_outlined, size: 18, color: cs.onSurfaceVariant),
+            const SizedBox(width: 8),
+            Text('My Classes', style: theme.textTheme.titleMedium),
+          ],
+        ),
+        const SizedBox(height: 12),
+
+        if (isLoading && classes.isEmpty)
+          const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          )
+        else if (classes.isEmpty)
+          _EmptyClassList(onJoin: _showJoinDialog)
+        else
+          ...classes.map(
+            (cls) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Card(
+                child: ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: cs.primaryContainer,
+                    child: Icon(Icons.school_outlined,
+                        color: cs.onPrimaryContainer),
+                  ),
+                  title: Text(cls['name'] as String),
+                  trailing: FilledButton.tonal(
+                    onPressed: () => context.push(
+                      '/student/classes/${cls['id']}/topics',
+                      extra: cls['name'] as String,
+                    ),
+                    child: const Text('View Topics'),
+                  ),
+                ),
               ),
-            ),
-            title: Text(cls['name'] as String),
-            trailing: FilledButton.tonal(
-              onPressed: () => context.push(
-                '/student/classes/${cls['id']}/topics',
-                extra: cls['name'] as String,
-              ),
-              child: const Text('View Topics'),
             ),
           ),
-        );
-      },
+      ],
+    );
+  }
+}
+
+// ── Notes hero card ───────────────────────────────────────────────────────────
+
+class _NotesHeroCard extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
+    return Card(
+      elevation: 0,
+      color: cs.primaryContainer,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: InkWell(
+        onTap: () => context.push('/student/notes'),
+        borderRadius: BorderRadius.circular(20),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon block
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: cs.primary,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Icon(Icons.menu_book_rounded,
+                    size: 32, color: cs.onPrimary),
+              ),
+              const SizedBox(width: 20),
+              // Text block
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'My Notebooks',
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: cs.onPrimaryContainer,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Subjects · Chapters · Topics\nHandwritten notes with OCR',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: cs.onPrimaryContainer.withAlpha(180),
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: cs.primary,
+                        foregroundColor: cs.onPrimary,
+                      ),
+                      onPressed: () => context.push('/student/notes'),
+                      icon: const Icon(Icons.arrow_forward, size: 16),
+                      label: const Text('Open Notebooks'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }
@@ -155,36 +246,34 @@ class _EmptyClassList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 48, horizontal: 32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              Icons.school_outlined,
-              size: 80,
-              color: Theme.of(context).colorScheme.outlineVariant,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              "You haven't joined any class yet.",
-              style: Theme.of(context).textTheme.titleMedium,
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            const Text(
-              'Tap the button below to get started.',
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            FilledButton.icon(
-              onPressed: onJoin,
-              icon: const Icon(Icons.add),
-              label: const Text('Join Class'),
-            ),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 32, horizontal: 16),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            Icons.school_outlined,
+            size: 64,
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            "You haven't joined any class yet.",
+            style: Theme.of(context).textTheme.titleMedium,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Tap the button below to get started.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
+          FilledButton.icon(
+            onPressed: onJoin,
+            icon: const Icon(Icons.add),
+            label: const Text('Join Class'),
+          ),
+        ],
       ),
     );
   }

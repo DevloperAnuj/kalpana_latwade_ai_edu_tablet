@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:eduforge_core/eduforge_core.dart';
 
 import 'bloc/student/student_bloc.dart';
+import 'core/theme/app_theme.dart';
 
 class EduForgeApp extends StatelessWidget {
   final AuthBloc authBloc;
@@ -29,8 +30,8 @@ class EduForgeApp extends StatelessWidget {
         builder: (context, themeMode) {
           return MaterialApp.router(
             title: 'EduForge – Student',
-            theme: ThemeData.light(useMaterial3: true),
-            darkTheme: ThemeData.dark(useMaterial3: true),
+            theme: lightTheme,
+            darkTheme: darkTheme,
             themeMode: themeMode,
             routerConfig: router,
             debugShowCheckedModeBanner: false,

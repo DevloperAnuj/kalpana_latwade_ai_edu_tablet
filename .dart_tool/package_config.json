@@ -104,6 +104,18 @@
       "languageVersion": "3.4"
     },
     {
+      "name": "connectivity_plus",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/connectivity_plus-6.1.5",
+      "packageUri": "lib/",
+      "languageVersion": "3.2"
+    },
+    {
+      "name": "connectivity_plus_platform_interface",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/connectivity_plus_platform_interface-2.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.18"
+    },
+    {
       "name": "conventional_commit",
       "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/conventional_commit-0.6.1+1",
       "packageUri": "lib/",
@@ -138,6 +150,12 @@
       "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/dart_jsonwebtoken-3.4.1",
       "packageUri": "lib/",
       "languageVersion": "3.0"
+    },
+    {
+      "name": "dbus",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/dbus-0.7.12",
+      "packageUri": "lib/",
+      "languageVersion": "2.17"
     },
     {
       "name": "equatable",
@@ -230,6 +248,18 @@
       "languageVersion": "3.6"
     },
     {
+      "name": "google_mlkit_commons",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_commons-0.8.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
+      "name": "google_mlkit_text_recognition",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/google_mlkit_text_recognition-0.13.1",
+      "packageUri": "lib/",
+      "languageVersion": "2.16"
+    },
+    {
       "name": "gotrue",
       "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/gotrue-2.20.0",
       "packageUri": "lib/",
@@ -248,10 +278,22 @@
       "languageVersion": "3.0"
     },
     {
+      "name": "hive",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/hive-2.2.3",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "hive_ce",
       "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/hive_ce-2.19.3",
       "packageUri": "lib/",
       "languageVersion": "3.4"
+    },
+    {
+      "name": "hive_flutter",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/hive_flutter-1.1.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "http",
@@ -394,6 +436,12 @@
     {
       "name": "nested",
       "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
+      "name": "nm",
+      "rootUri": "file:///C:/Users/PRINCE/AppData/Local/Pub/Cache/hosted/pub.dev/nm-0.5.0",
       "packageUri": "lib/",
       "languageVersion": "2.12"
     },
