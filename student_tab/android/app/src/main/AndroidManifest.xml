@@ -1,5 +1,22 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Network -->
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- Haptic feedback -->
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <!-- File picker / media access (Android ≤ 12 / API ≤ 32) -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32"/>
+
+    <!-- File picker / media access (Android 13+ / API 33+) -->
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES"/>
+
+    <!-- Keep screen on during study sessions -->
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <application
         android:label="EduForge"
         android:name="${applicationName}"

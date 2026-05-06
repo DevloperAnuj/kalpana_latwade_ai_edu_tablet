@@ -5,6 +5,7 @@ melos_kalpana_ai_edu_tablet_workspace.iml
 pubspec.yaml
 pubspec.lock
 build/
+interactive-ink-examples-android/
 
 # Common generated/dependency folders
 **/node_modules/

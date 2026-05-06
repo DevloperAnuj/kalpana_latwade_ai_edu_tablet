@@ -95,15 +95,29 @@ class _NotePageEditorScreenState extends State<NotePageEditorScreen> {
                 children: [
                   _Toolbar(boundaryKey: _boundaryKey),
                   Expanded(
-                    child: HandwritingCanvas(
-                      strokes: state.strokes,
-                      tool: state.tool,
-                      penColor: state.penColor,
-                      penWidth: state.penWidth,
-                      pattern: state.pattern,
-                      boundaryKey: _boundaryKey,
-                      onStrokeComplete: (stroke) =>
-                          context.read<NoteEditorCubit>().addStroke(stroke),
+                    child: Stack(
+                      children: [
+                        HandwritingCanvas(
+                          strokes: state.strokes,
+                          tool: state.tool,
+                          penColor: state.penColor,
+                          penWidth: state.penWidth,
+                          pattern: state.pattern,
+                          boundaryKey: _boundaryKey,
+                          onStrokeComplete: (stroke) =>
+                              context.read<NoteEditorCubit>().addStroke(stroke),
+                        ),
+                        if (state.tool == DrawingTool.pan)
+                          Positioned(
+                            left: 12,
+                            bottom: 20,
+                            child: _PanExitButton(
+                              onTap: () => context
+                                  .read<NoteEditorCubit>()
+                                  .setTool(DrawingTool.pen),
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
@@ -227,83 +241,87 @@ class _Toolbar extends StatelessWidget {
         return Container(
           color: Theme.of(context).colorScheme.surfaceContainerHighest,
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                // Tool group
-                _ToolBtn(
-                  icon: Icons.edit,
-                  label: 'Pen',
-                  selected: state.tool == DrawingTool.pen,
-                  onTap: () => cubit.setTool(DrawingTool.pen),
+          child: Row(
+            children: [
+              // ── Primary tools: always visible, outside scroll view ──────────
+              _ToolBtn(
+                icon: Icons.edit,
+                label: 'Pen',
+                selected: state.tool == DrawingTool.pen,
+                onTap: () => cubit.setTool(DrawingTool.pen),
+              ),
+              _ToolBtn(
+                icon: Icons.phonelink_erase,
+                label: 'Eraser',
+                selected: state.tool == DrawingTool.eraser,
+                onTap: () => cubit.setTool(DrawingTool.eraser),
+              ),
+              _ToolBtn(
+                icon: Icons.pan_tool_outlined,
+                label: 'Pan',
+                selected: state.tool == DrawingTool.pan,
+                onTap: () => cubit.setTool(DrawingTool.pan),
+              ),
+              const VerticalDivider(width: 12),
+              // ── Secondary tools: scrollable ─────────────────────────────────
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _StrokeWidthDropdown(
+                        value: state.penWidth,
+                        onChanged: cubit.setPenWidth,
+                      ),
+                      const VerticalDivider(width: 16),
+                      _ColorDot(
+                          color: Colors.black,
+                          selected: state.penColor == Colors.black,
+                          onTap: () => cubit.setPenColor(Colors.black)),
+                      _ColorDot(
+                          color: Colors.blue,
+                          selected: state.penColor == Colors.blue,
+                          onTap: () => cubit.setPenColor(Colors.blue)),
+                      _ColorDot(
+                          color: Colors.red,
+                          selected: state.penColor == Colors.red,
+                          onTap: () => cubit.setPenColor(Colors.red)),
+                      _ColorDot(
+                          color: Colors.green,
+                          selected: state.penColor == Colors.green,
+                          onTap: () => cubit.setPenColor(Colors.green)),
+                      const VerticalDivider(width: 16),
+                      _PatternPicker(
+                        current: state.pattern,
+                        onSelect: cubit.setPattern,
+                      ),
+                      const VerticalDivider(width: 16),
+                      _ToolBtn(
+                        icon: Icons.undo,
+                        label: 'Undo',
+                        selected: false,
+                        enabled: state.canUndo,
+                        onTap: cubit.undo,
+                      ),
+                      _ToolBtn(
+                        icon: Icons.redo,
+                        label: 'Redo',
+                        selected: false,
+                        enabled: state.canRedo,
+                        onTap: cubit.redo,
+                      ),
+                      _ToolBtn(
+                        icon: Icons.delete_sweep_outlined,
+                        label: 'Clear',
+                        selected: false,
+                        onTap: () => _confirmClear(context, cubit),
+                      ),
+                    ],
+                  ),
                 ),
-                _ToolBtn(
-                  icon: Icons.phonelink_erase,
-                  label: 'Eraser',
-                  selected: state.tool == DrawingTool.eraser,
-                  onTap: () => cubit.setTool(DrawingTool.eraser),
-                ),
-                _ToolBtn(
-                  icon: Icons.pan_tool_outlined,
-                  label: 'Pan',
-                  selected: state.tool == DrawingTool.pan,
-                  onTap: () => cubit.setTool(DrawingTool.pan),
-                ),
-                const VerticalDivider(width: 16),
-                _StrokeWidthDropdown(
-                  value: state.penWidth,
-                  onChanged: cubit.setPenWidth,
-                ),
-                const VerticalDivider(width: 16),
-                // Colour picker
-                _ColorDot(
-                    color: Colors.black,
-                    selected: state.penColor == Colors.black,
-                    onTap: () => cubit.setPenColor(Colors.black)),
-                _ColorDot(
-                    color: Colors.blue,
-                    selected: state.penColor == Colors.blue,
-                    onTap: () => cubit.setPenColor(Colors.blue)),
-                _ColorDot(
-                    color: Colors.red,
-                    selected: state.penColor == Colors.red,
-                    onTap: () => cubit.setPenColor(Colors.red)),
-                _ColorDot(
-                    color: Colors.green,
-                    selected: state.penColor == Colors.green,
-                    onTap: () => cubit.setPenColor(Colors.green)),
-                const VerticalDivider(width: 16),
-                // Pattern picker
-                _PatternPicker(
-                  current: state.pattern,
-                  onSelect: cubit.setPattern,
-                ),
-                const VerticalDivider(width: 16),
-                // Undo / redo / clear
-                _ToolBtn(
-                  icon: Icons.undo,
-                  label: 'Undo',
-                  selected: false,
-                  enabled: state.canUndo,
-                  onTap: cubit.undo,
-                ),
-                _ToolBtn(
-                  icon: Icons.redo,
-                  label: 'Redo',
-                  selected: false,
-                  enabled: state.canRedo,
-                  onTap: cubit.redo,
-                ),
-                _ToolBtn(
-                  icon: Icons.delete_sweep_outlined,
-                  label: 'Clear',
-                  selected: false,
-                  onTap: () => _confirmClear(context, cubit),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         );
       },
@@ -569,6 +587,50 @@ class _EngineChip extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+}
+
+// ── Pan exit overlay ──────────────────────────────────────────────────────────
+
+class _PanExitButton extends StatelessWidget {
+  final VoidCallback onTap;
+  const _PanExitButton({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: cs.primary,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: cs.primary.withAlpha(90),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.edit, size: 16, color: cs.onPrimary),
+            const SizedBox(width: 6),
+            Text(
+              'Back to Pen',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: cs.onPrimary,
+              ),
+            ),
+          ],
         ),
       ),
     );

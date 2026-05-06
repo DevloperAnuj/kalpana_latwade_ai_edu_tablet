@@ -1,3 +1,5 @@
+import 'secrets.dart';
+
 class AiConstants {
-  static const String geminiApiKey = 'AIzaSyDvzPzqQdSA-AcXnZLhzMxWMY-ADB8TTlU';
+  static const String geminiApiKey = Secrets.geminiApiKey;
 }
