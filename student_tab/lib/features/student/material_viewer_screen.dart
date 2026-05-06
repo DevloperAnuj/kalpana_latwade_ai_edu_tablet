@@ -56,6 +56,14 @@ class _MaterialViewerScreenState extends State<MaterialViewerScreen>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true,
+          labelColor: Theme.of(context).appBarTheme.foregroundColor ??
+              Theme.of(context).colorScheme.onSurface,
+          unselectedLabelColor:
+              (Theme.of(context).appBarTheme.foregroundColor ??
+                      Theme.of(context).colorScheme.onSurface)
+                  .withValues(alpha: 0.6),
+          indicatorColor: Theme.of(context).appBarTheme.foregroundColor ??
+              Theme.of(context).colorScheme.onSurface,
           tabs: _tabs,
         ),
       ),
