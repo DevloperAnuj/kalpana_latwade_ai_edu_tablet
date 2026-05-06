@@ -4,3 +4,6 @@
 
 # Local secrets — never commit
 **/secrets.dart
+
+# External example project — not part of this repo
+interactive-ink-examples-android/
