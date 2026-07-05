@@ -136,6 +136,17 @@ ThemeData _buildTheme({
       ),
     ),
 
+    // A TabBar placed in AppBar.bottom paints over appBarBg, so it needs
+    // appBarFg-based colors — the default M3 TabBar uses colorScheme.primary
+    // for the selected label/indicator, which is invisible against a primary
+    // colored app bar (e.g. the login/sign-up tabs on the auth screen).
+    tabBarTheme: TabBarThemeData(
+      labelColor: appBarFg,
+      unselectedLabelColor: appBarFg.withAlpha(178),
+      indicatorColor: appBarFg,
+      dividerColor: Colors.transparent,
+    ),
+
     cardTheme: CardThemeData(
       color: cardColor,
       elevation: 2,

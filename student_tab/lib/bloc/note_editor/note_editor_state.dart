@@ -37,7 +37,7 @@ class NoteEditorState extends Equatable {
     required this.strokes,
     this.tool = DrawingTool.pen,
     this.penColor = Colors.black,
-    this.penWidth = 3.0,
+    this.penWidth = 2.0,
     this.pattern = PagePattern.ruled,
     this.canUndo = false,
     this.canRedo = false,

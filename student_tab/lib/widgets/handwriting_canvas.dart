@@ -1,3 +1,5 @@
+import 'package:flutter/gestures.dart'
+    show PointerDeviceKind, PointerHoverEvent;
 import 'package:flutter/material.dart';
 
 import '../bloc/note_editor/note_editor_state.dart';
@@ -42,13 +44,49 @@ class HandwritingCanvas extends StatefulWidget {
 }
 
 class _HandwritingCanvasState extends State<HandwritingCanvas> {
+  // Palm rejection. Devices with an active pen (e.g. Redmi Pad 2 + Smart Pen)
+  // expose it as a separate stylus digitizer that also reports *hover* — the
+  // pen is detected above the glass before the palm lands. So: once any
+  // stylus event (hover or contact) is seen, touch-kind pointers are barred
+  // from drawing for the rest of the session. Finger drawing still works on
+  // devices where no stylus ever appears. The radius heuristic is a fallback
+  // for a palm landing before the very first stylus event.
+  static const _palmRadiusThreshold = 30.0; // logical px
+
   final _transformController = TransformationController();
   List<StrokePoint> _currentPoints = [];
+  int? _activePointer;
+  bool _stylusSeen = false;
 
   // ── Pointer callbacks ─────────────────────────────────────────────────────
 
+  void _noteKind(PointerDeviceKind kind) {
+    if (kind == PointerDeviceKind.stylus ||
+        kind == PointerDeviceKind.invertedStylus) {
+      _stylusSeen = true;
+    }
+  }
+
+  bool _shouldRejectAsPalm(PointerDownEvent event) {
+    if (event.kind != PointerDeviceKind.touch) return false;
+    if (_stylusSeen) return true;
+    // A resting palm has a much larger contact patch than a fingertip.
+    return event.radiusMajor > _palmRadiusThreshold;
+  }
+
+  void _onHover(PointerHoverEvent event) => _noteKind(event.kind);
+
   void _onDown(PointerDownEvent event) {
+    _noteKind(event.kind);
     if (widget.tool == DrawingTool.pan) return;
+    if (_shouldRejectAsPalm(event)) return;
+
+    // A stylus takes over even if a touch pointer (palm that slipped through
+    // the heuristics) is already drawing — its partial stroke is discarded.
+    final isStylus = event.kind != PointerDeviceKind.touch && _stylusSeen;
+    if (_activePointer != null && !isStylus) return;
+
+    _activePointer = event.pointer;
     setState(() {
       _currentPoints = [
         StrokePoint(event.localPosition.dx, event.localPosition.dy,
@@ -58,7 +96,8 @@ class _HandwritingCanvasState extends State<HandwritingCanvas> {
   }
 
   void _onMove(PointerMoveEvent event) {
-    if (widget.tool == DrawingTool.pan || _currentPoints.isEmpty) return;
+    if (widget.tool == DrawingTool.pan) return;
+    if (event.pointer != _activePointer || _currentPoints.isEmpty) return;
     setState(() {
       _currentPoints = [
         ..._currentPoints,
@@ -69,7 +108,10 @@ class _HandwritingCanvasState extends State<HandwritingCanvas> {
   }
 
   void _onUp(PointerUpEvent event) {
-    if (widget.tool == DrawingTool.pan || _currentPoints.isEmpty) return;
+    if (widget.tool == DrawingTool.pan) return;
+    if (event.pointer != _activePointer) return;
+    _activePointer = null;
+    if (_currentPoints.isEmpty) return;
     final stroke = StrokeData(
       points: List<StrokePoint>.from(_currentPoints),
       color: widget.penColor,
@@ -81,6 +123,8 @@ class _HandwritingCanvasState extends State<HandwritingCanvas> {
   }
 
   void _onCancel(PointerCancelEvent event) {
+    if (event.pointer != _activePointer) return;
+    _activePointer = null;
     setState(() => _currentPoints = []);
   }
 
@@ -112,6 +156,7 @@ class _HandwritingCanvasState extends State<HandwritingCanvas> {
           height: kCanvasHeight,
           child: Listener(
             behavior: HitTestBehavior.opaque,
+            onPointerHover: _onHover,
             onPointerDown: _onDown,
             onPointerMove: _onMove,
             onPointerUp: _onUp,
